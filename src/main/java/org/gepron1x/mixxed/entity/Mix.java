@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 
 @Entity
+@Table(name = "mixes")
 public class Mix {
 
     @Id
@@ -50,6 +51,9 @@ public class Mix {
 
     @ManyToMany(mappedBy = "mixes")
     private List<Playlist> playlists = new ArrayList<>();
+
+    @OneToMany(mappedBy = "mix", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Like> likes = new ArrayList<>();
 
     private long totalPlays;
 

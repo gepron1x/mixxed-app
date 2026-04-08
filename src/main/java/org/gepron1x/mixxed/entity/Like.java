@@ -10,24 +10,18 @@ import lombok.*;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "mix_tracks")
-public class MixTrack {
+@Table(name = "likes")
+public class Like {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mix_id", nullable = false)
     private Mix mix;
-
-    private int position;
-
-    private int startTimeSeconds;
-
-    @Column(nullable = false)
-    private String artist;
-
-    @Column(nullable = false)
-    private String title;
 }

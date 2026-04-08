@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 
 @Entity
+@Table(name = "playlists")
 public class Playlist {
 
     @Id
@@ -23,10 +24,10 @@ public class Playlist {
     @JoinColumn(name="author_id")
     private User author;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 32)
     private String slug;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String title;
 
     private String description;

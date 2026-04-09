@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+main {
+    padding-bottom: 80px;
+}
+
+@media (min-width: 768px) {
+    main {
+        padding-bottom: 2rem;
+    }
+}
+
+input, button, a {
+    transition: all 0.2s ease;
+}
+
+nav a:hover {
+    color: white;
+}
+
+input:focus {
+    box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.15);
+}

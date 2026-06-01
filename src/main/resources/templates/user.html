@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${profileUser.username} + ' — MIXXED'">Профиль — MIXXED</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#0f0f0f', card: '#1a1a1a', border: '#2a2a2a', accent: '#7c3aed' } } } }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="bg-bg text-white min-h-screen">
+
+<div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
+
+<main style="max-width:1100px; margin:0 auto; padding:2rem 1.5rem;">
+
+    <!-- Profile header -->
+    <div style="display:flex; align-items:flex-start; gap:2rem; margin-bottom:3rem;">
+        <!-- Avatar -->
+        <div style="flex-shrink:0;">
+            <img th:if="${profileUser.profilePictureUrl != null}" th:src="${profileUser.profilePictureUrl}"
+                 style="width:96px; height:96px; border-radius:50%; object-fit:cover;" alt="avatar"/>
+            <div th:unless="${profileUser.profilePictureUrl != null}"
+                 style="width:96px; height:96px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:700;"
+                 th:text="${profileUser.username.substring(0,1).toUpperCase()}"></div>
+        </div>
+
+        <!-- Info -->
+        <div style="flex:1;">
+            <h1 style="font-size:1.75rem; font-weight:800; margin-bottom:0.25rem;" th:text="${profileUser.username}"></h1>
+            <p th:if="${profileUser.bio != null and !profileUser.bio.isEmpty()}"
+               th:text="${profileUser.bio}" style="color:#888; margin-bottom:0.75rem; font-size:0.9375rem; line-height:1.6;"></p>
+            <div style="display:flex; gap:1.5rem; margin-bottom:1rem; color:#888; font-size:0.875rem;">
+                <span><strong style="color:#fff;" th:text="${followersCount}"></strong> подписчиков</span>
+                <span><strong style="color:#fff;" th:text="${followingCount}"></strong> подписок</span>
+                <span><strong style="color:#fff;" th:text="${#lists.size(mixes)}"></strong> миксов</span>
+            </div>
+            <div style="display:flex; gap:0.75rem;">
+                <form th:if="${!isOwn and currentUser != null}" th:action="'/u/' + ${profileUser.username} + '/follow'" method="post">
+                    <button type="submit" class="btn-primary" th:text="${isFollowing ? 'Отписаться' : 'Подписаться'}"
+                            th:style="${isFollowing ? 'background:#2a2a2a; color:#fff; border:1px solid #2a2a2a;' : ''}"></button>
+                </form>
+                <a th:if="${isOwn}" href="/settings" class="btn-secondary" style="text-decoration:none; display:inline-block;">Редактировать профиль</a>
+                <a th:if="${!isOwn and currentUser == null}" href="/login" class="btn-primary" style="text-decoration:none; display:inline-block;">Подписаться</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div x-data="{tab: 'mixes'}">
+        <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; border-bottom:1px solid #2a2a2a; padding-bottom:1rem;">
+            <button class="tab-btn" :class="tab === 'mixes' ? 'active' : ''" @click="tab = 'mixes'">
+                Все миксы (<span th:text="${#lists.size(mixes)}"></span>)
+            </button>
+            <button class="tab-btn" :class="tab === 'likes' ? 'active' : ''" @click="tab = 'likes'">
+                Понравилось (<span th:text="${#lists.size(likedMixes)}"></span>)
+            </button>
+            <button class="tab-btn" :class="tab === 'playlists' ? 'active' : ''" @click="tab = 'playlists'">
+                Плейлисты (<span th:text="${#lists.size(playlists)}"></span>)
+            </button>
+        </div>
+
+        <!-- Mixes tab -->
+        <div x-show="tab === 'mixes'">
+            <div th:if="${!mixes.isEmpty()}"
+                 style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.25rem;">
+                <div th:each="mix : ${mixes}" class="mix-card">
+                    <a th:href="'/mix/' + ${mix.slug}" style="text-decoration:none; display:block;">
+                        <div style="aspect-ratio:1; background:#2a2a2a; overflow:hidden;">
+                            <img th:if="${mix.coverUrl != null}" th:src="${mix.coverUrl}"
+                                 alt="cover" style="width:100%; height:100%; object-fit:cover;"/>
+                            <div th:unless="${mix.coverUrl != null}"
+                                 style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2.5rem;">🎵</div>
+                        </div>
+                        <div style="padding:0.875rem;">
+                            <div th:text="${mix.title}" style="font-weight:600; margin-bottom:0.25rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; font-size:0.9375rem;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                                <span th:if="${mix.genre != null}" class="genre-badge" th:text="${mix.genre}"></span>
+                                <span style="color:#888; font-size:0.75rem;" th:text="${mix.totalPlays} + ' ♪'"></span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div th:if="${mixes.isEmpty()}" style="color:#888; text-align:center; padding:3rem;">
+                Миксов пока нет.
+            </div>
+        </div>
+
+        <!-- Likes tab -->
+        <div x-show="tab === 'likes'" style="display:none;">
+            <div th:if="${!likedMixes.isEmpty()}"
+                 style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.25rem;">
+                <div th:each="mix : ${likedMixes}" class="mix-card">
+                    <a th:href="'/mix/' + ${mix.slug}" style="text-decoration:none; display:block;">
+                        <div style="aspect-ratio:1; background:#2a2a2a; overflow:hidden;">
+                            <img th:if="${mix.coverUrl != null}" th:src="${mix.coverUrl}"
+                                 alt="cover" style="width:100%; height:100%; object-fit:cover;"/>
+                            <div th:unless="${mix.coverUrl != null}"
+                                 style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2.5rem;">🎵</div>
+                        </div>
+                        <div style="padding:0.875rem;">
+                            <div th:text="${mix.title}" style="font-weight:600; margin-bottom:0.25rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; font-size:0.9375rem;"></div>
+                            <div style="color:#888; font-size:0.8125rem;" th:text="${mix.author.username}"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div th:if="${likedMixes.isEmpty()}" style="color:#888; text-align:center; padding:3rem;">
+                Нет понравившихся миксов.
+            </div>
+        </div>
+
+        <!-- Playlists tab -->
+        <div x-show="tab === 'playlists'" style="display:none;">
+            <div th:if="${isOwn}" style="margin-bottom:1.5rem;" x-data="{creating: false}">
+                <button @click="creating = !creating" class="btn-primary">+ Новый плейлист</button>
+                <form x-show="creating" th:action="@{/playlist/create}" method="post"
+                      style="margin-top:1rem; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:1.25rem; max-width:400px;">
+                    <div style="margin-bottom:0.875rem;">
+                        <label style="display:block; color:#888; font-size:0.8125rem; margin-bottom:0.4rem;">Название</label>
+                        <input type="text" name="title" class="form-input" required placeholder="Мой плейлист"/>
+                    </div>
+                    <div style="margin-bottom:1rem;">
+                        <label style="display:block; color:#888; font-size:0.8125rem; margin-bottom:0.4rem;">Описание</label>
+                        <input type="text" name="description" class="form-input" placeholder="Необязательно"/>
+                    </div>
+                    <button type="submit" class="btn-primary">Создать</button>
+                </form>
+            </div>
+            <div th:if="${!playlists.isEmpty()}"
+                 style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.25rem;">
+                <div th:each="pl : ${playlists}" class="mix-card">
+                    <a th:href="'/playlist/' + ${pl.slug}" style="text-decoration:none; display:block;">
+                        <div style="aspect-ratio:1; background:#2a2a2a; display:flex; align-items:center; justify-content:center; font-size:3rem;">📋</div>
+                        <div style="padding:0.875rem;">
+                            <div th:text="${pl.title}" style="font-weight:600; color:#fff; font-size:0.9375rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+                            <div th:text="${#lists.size(pl.mixes)} + ' миксов'" style="color:#888; font-size:0.8125rem; margin-top:0.25rem;"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div th:if="${playlists.isEmpty()}" style="color:#888; text-align:center; padding:3rem;">
+                Плейлистов пока нет.
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

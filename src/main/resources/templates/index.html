@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MIXXED — Главная</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#0f0f0f',
+                        card: '#1a1a1a',
+                        border: '#2a2a2a',
+                        accent: '#7c3aed',
+                    }
+                }
+            }
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="bg-bg text-white min-h-screen">
+
+<div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
+
+<main style="max-width:1280px; margin:0 auto; padding:2rem 1.5rem;">
+    <section style="margin-bottom:3rem;">
+        <div sec:authorize="isAuthenticated()">
+            <h1 style="font-size:2.5rem; font-weight:800; margin-bottom:0.5rem;">
+                Привет, <span th:if="${currentUser != null}" th:text="${currentUser.username}" style="color:#7c3aed;"></span>!
+            </h1>
+            <p style="color:#888; font-size:1.125rem;">Твои рекомендации на сегодня</p>
+        </div>
+        <div sec:authorize="!isAuthenticated()">
+            <h1 style="font-size:2.5rem; font-weight:800; margin-bottom:0.5rem;">
+                Добро пожаловать в <span style="color:#7c3aed;">MIXXED</span>
+            </h1>
+            <p style="color:#888; font-size:1.125rem;">Лучшие DJ-миксы, собранные для тебя</p>
+            <div style="margin-top:1.5rem; display:flex; gap:1rem;">
+                <a href="/register" class="btn-primary" style="text-decoration:none; display:inline-block;">Начать слушать</a>
+                <a href="/charts" class="btn-secondary" style="text-decoration:none; display:inline-block;">Топ чарты</a>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3rem;">
+        <h2 style="font-size:1.5rem; font-weight:700; margin-bottom:1.5rem;">
+            <span sec:authorize="isAuthenticated()">Для вас</span>
+            <span sec:authorize="!isAuthenticated()">Новые миксы</span>
+        </h2>
+
+    </section>
+
+    <section>
+
+    </section>
+</main>
+</body>
+</html>

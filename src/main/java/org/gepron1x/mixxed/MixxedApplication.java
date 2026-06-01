@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-@RestController
 public class MixxedApplication {
 
     public static void main(String[] args) {
@@ -14,9 +13,5 @@ public class MixxedApplication {
     }
 
 
-    @GetMapping
-    public String helloWorld() {
-        return "Hello world, Mixxed!";
-    }
 
 }

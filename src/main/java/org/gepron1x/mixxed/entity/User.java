@@ -36,6 +36,7 @@ public class User {
 
     private String profilePictureUrl;
     private String bio;
+    private boolean admin;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Mix> mixes = new ArrayList<>();

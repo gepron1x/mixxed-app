@@ -62,12 +62,20 @@
             </div>
 
             <div style="margin-top:1.5rem;">
-                <label style="display:block; font-size:0.875rem; color:#888; margin-bottom:0.5rem;">Фото профиля</label>
                 <input type="file"
+                       id="avatarFile"
                        name="avatarFile"
                        accept="image/*"
                        @change="previewFile($event)"
-                       style="color:#888; font-size:0.875rem; width:100%;"/>
+                       style="display: none;"/>
+
+                <label for="avatarFile"
+                       class="btn-primary cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v-4m0 0l4 4m-4-4l4-4m12 4v4m0-4l-4-4m4 4l-4 4" />
+                    </svg>
+                    Выбрать фото
+                </label>
                 <p style="color:#666; font-size:0.75rem; margin-top:0.375rem;">
                     JPEG, PNG. Максимум 5 МБ.
                 </p>

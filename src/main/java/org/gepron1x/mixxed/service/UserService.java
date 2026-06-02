@@ -65,10 +65,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public ResponseEntity<InputStreamResource> getUserAvatar(User user) {
-        return this.storageService.getFile(user.getProfilePictureUrl());
-    }
-
 
     @Transactional
     public boolean toggleFollow(User follower, User followed) {

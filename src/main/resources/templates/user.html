@@ -21,7 +21,7 @@
     <div style="display:flex; align-items:flex-start; gap:2rem; margin-bottom:3rem;">
         <!-- Avatar -->
         <div style="flex-shrink:0;">
-            <img th:if="${profileUser.profilePictureUrl != null}" th:src="${profileUser.profilePictureUrl}"
+            <img th:if="${profileUser.profilePictureUrl != null}" th:src="@{/s3/{key}(key=${profileUser.profilePictureUrl})}"
                  style="width:96px; height:96px; border-radius:50%; object-fit:cover;" alt="avatar"/>
             <div th:unless="${profileUser.profilePictureUrl != null}"
                  style="width:96px; height:96px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:700;"

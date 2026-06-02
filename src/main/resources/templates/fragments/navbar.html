@@ -36,7 +36,7 @@
                 <a th:if="${currentUser != null}" th:href="'/u/' + ${currentUser.username}"
                    style="display:flex; align-items:center; gap:0.5rem; text-decoration:none; color:#fff;">
                     <img th:if="${currentUser.profilePictureUrl != null}"
-                         th:src="${currentUser.profilePictureUrl}"
+                         th:src="@{/s3/{key}(key=${currentUser.profilePictureUrl})}"
                          style="width:32px; height:32px; border-radius:50%; object-fit:cover;" alt="avatar"/>
                     <div th:unless="${currentUser != null and currentUser.profilePictureUrl != null}"
                          style="width:32px; height:32px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.875rem;">

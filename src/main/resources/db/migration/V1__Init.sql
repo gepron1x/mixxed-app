@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR NOT NULL,
     registration_date DATE NOT NULL,
-    profile_picture_url VARCHAR,
+    profile_picture_url TEXT,
     bio TEXT,
     admin BOOL DEFAULT FALSE
 );

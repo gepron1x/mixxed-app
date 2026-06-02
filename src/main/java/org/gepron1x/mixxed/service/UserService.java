@@ -1,16 +1,20 @@
 package org.gepron1x.mixxed.service;
 
 import lombok.RequiredArgsConstructor;
+import org.gepron1x.mixxed.form.ProfileEditForm;
 import org.gepron1x.mixxed.form.RegisterForm;
 import org.gepron1x.mixxed.entity.Follow;
 import org.gepron1x.mixxed.entity.User;
 import org.gepron1x.mixxed.repository.FollowRepository;
 import org.gepron1x.mixxed.repository.UserRepository;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -21,6 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private final PasswordEncoder passwordEncoder;
+    private final StorageService storageService;
 
     @Transactional
     public User register(RegisterForm form) {
@@ -45,6 +50,23 @@ public class UserService {
     public User getCurrentUser(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) return null;
         return userRepository.findByUsername(auth.getName()).orElse(null);
+    }
+
+    @Transactional
+    public void updateProfile(User user, ProfileEditForm form) {
+        if (form.getBio() != null) {
+            user.setBio(form.getBio());
+        }
+        if (form.getAvatarFile() != null && !form.getAvatarFile().isEmpty()) {
+            String key = "avatars/" + user.getId();
+            storageService.uploadImage(form.getAvatarFile(), key);
+            user.setProfilePictureUrl(key);
+        }
+        userRepository.save(user);
+    }
+
+    public ResponseEntity<InputStreamResource> getUserAvatar(User user) {
+        return this.storageService.getFile(user.getProfilePictureUrl());
     }
 
 

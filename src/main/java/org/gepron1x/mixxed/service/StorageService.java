@@ -12,6 +12,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
@@ -20,6 +21,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
+import java.util.Optional;
 
 @Service
 public class StorageService {
@@ -87,25 +89,29 @@ public class StorageService {
         }
     }
 
-    public ResponseEntity<InputStreamResource> getFile(String key) {
+    public Optional<ResponseEntity<InputStreamResource>> getFile(String key) {
         GetObjectRequest getRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
                 .build();
-        ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getRequest);
-        System.out.println("KEY:" + key);
-        System.out.println("S3: " + s3Object);
+        ResponseInputStream<GetObjectResponse> s3Object;
+        try {
+             s3Object = s3Client.getObject(getRequest);
+        } catch (NoSuchKeyException ex) {
+            return Optional.empty();
+        }
+
         String contentType = s3Object.response().contentType();
         if (contentType == null) {
             contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
-        return ResponseEntity.ok()
+        return Optional.of(ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         ContentDisposition.attachment()
                                 .filename(key.substring(key.lastIndexOf('/') + 1))
                                 .build().toString())
-                .body(new InputStreamResource(s3Object));
+                .body(new InputStreamResource(s3Object)));
 
     }
 

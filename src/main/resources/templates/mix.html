@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${mix.title} + ' — MIXXED'">Mix — MIXXED</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#0f0f0f', card: '#1a1a1a', border: '#2a2a2a', accent: '#7c3aed' } } } }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="bg-bg text-white min-h-screen">
+
+<div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
+
+<main style="max-width:1100px; margin:0 auto; padding:2rem 1.5rem;">
+    <div style="display:grid; grid-template-columns:1fr 340px; gap:2rem;" x-data="audioPlayer()">
+
+        <!-- Left column -->
+        <div>
+            <!-- Mix header -->
+            <div style="display:flex; gap:1.5rem; margin-bottom:2rem;">
+                <div style="width:180px; height:180px; flex-shrink:0; border-radius:12px; overflow:hidden; background:#2a2a2a;">
+                    <img th:if="${mix.coverUrl != null}" th:src="@{/s3/{key}(key=${mix.coverUrl})}"
+                         alt="cover" style="width:100%; height:100%; object-fit:cover;"/>
+                    <div th:unless="${mix.coverUrl != null}"
+                         style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:4rem;">🎵</div>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                    <div th:if="${mix.genre != null}" class="genre-badge" style="width:fit-content; margin-bottom:0.75rem;" th:text="${mix.genre}"></div>
+                    <h1 style="font-size:1.75rem; font-weight:800; margin-bottom:0.5rem;" th:text="${mix.title}"></h1>
+                    <a th:href="'/u/' + ${mix.author.username}"
+                       style="color:#888; text-decoration:none; font-size:0.9375rem; margin-bottom:0.75rem;"
+                       th:text="${mix.author.username}"></a>
+                    <p th:if="${mix.description != null}" th:text="${mix.description}" style="color:#888; font-size:0.875rem; line-height:1.5;"></p>
+                    <div style="display:flex; align-items:center; gap:1rem; margin-top:1rem;">
+                        <span style="color:#888; font-size:0.875rem;" th:text="${mix.totalPlays} + ' прослушиваний'"></span>
+                        <!-- Like button -->
+                        <button sec:authorize="isAuthenticated()"
+                                @click="toggleLike()"
+                                :style="liked ? 'color:#7c3aed;' : 'color:#888;'"
+                                style="background:none; border:1px solid #2a2a2a; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; font-size:0.875rem; transition:all 0.2s;"
+                                :class="liked ? 'border-accent' : ''">
+                            <span x-text="liked ? '♥' : '♡'"></span>
+                            <span x-text="likeCount"></span>
+                        </button>
+                        <span sec:authorize="!isAuthenticated()" style="color:#888; font-size:0.875rem;">
+                            <span th:text="${likeCount}"></span> ♥
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio player -->
+            <div class="audio-player" style="margin-bottom:2rem;">
+                <audio x-ref="audio"
+                       th:attr="data-slug=${mix.slug}"
+                       preload="none"
+                       @timeupdate="onTimeUpdate()"
+                       @loadedmetadata="onLoaded()"
+                       @ended="playing = false"
+                       style="display:none;"></audio>
+
+                <!-- Play/Pause + time -->
+                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                    <button @click="togglePlay()"
+                            style="width:48px; height:48px; border-radius:50%; background:#7c3aed; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.25rem; flex-shrink:0;">
+                        <span x-text="playing ? '⏸' : '▶'"></span>
+                    </button>
+                    <div style="flex:1;">
+                        <div class="progress-bar" @click="seek($event)">
+                            <div class="progress-fill" :style="'width:' + progress + '%'"></div>
+                        </div>
+                    </div>
+                    <span style="color:#888; font-size:0.8125rem; white-space:nowrap; min-width:80px; text-align:right;"
+                          x-text="formatTime(currentTime) + ' / ' + formatTime(duration)">0:00 / 0:00</span>
+                </div>
+
+                <!-- Volume -->
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <span style="color:#888; font-size:0.875rem;">🔊</span>
+                    <input type="range" min="0" max="1" step="0.05" x-model="volume" @input="setVolume()"
+                           style="flex:1; max-width:120px; accent-color:#7c3aed;"/>
+                </div>
+            </div>
+
+            <!-- Tracklist -->
+            <div th:if="${mix.tracks != null and !mix.tracks.isEmpty()}" style="margin-bottom:2rem;">
+                <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:1rem;">Треклист</h3>
+                <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden;">
+                    <div th:each="track, stat : ${mix.tracks}"
+                         class="tracklist-item"
+                         :class="activeTrack === [[${track.position}]] ? 'active' : ''"
+                         @click="seekToTime([[${track.startTimeSeconds}]], [[${track.position}]])"
+                         style="border-bottom:1px solid #2a2a2a;">
+                        <span style="color:#888; font-size:0.8125rem; min-width:36px;" th:text="${track.position}"></span>
+                        <span style="color:#888; font-size:0.8125rem; min-width:50px;"
+                              th:text="${track.startTimeSeconds / 60} + ':' + ${#strings.toString(track.startTimeSeconds % 60).length() == 1 ? '0' + track.startTimeSeconds % 60 : track.startTimeSeconds % 60}"></span>
+                        <span style="flex:1; font-size:0.875rem;">
+                            <span th:text="${track.artist}" style="font-weight:500;"></span>
+                            <span th:if="${track.title != null and !track.title.isEmpty()}" style="color:#888;"> — <span th:text="${track.title}"></span></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add to playlist -->
+            <div sec:authorize="isAuthenticated()" th:if="${userPlaylists != null and !userPlaylists.isEmpty()}"
+                 style="margin-bottom:2rem;" x-data="{open: false}">
+                <button @click="open = !open" class="btn-secondary" style="font-size:0.875rem;">
+                    + В плейлист
+                </button>
+                <div x-show="open" style="margin-top:0.75rem; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px; overflow:hidden; max-width:300px;">
+                    <div th:each="pl : ${userPlaylists}">
+                        <form th:action="'/playlist/' + ${pl.slug} + '/add'" method="post" style="margin:0;">
+                            <input type="hidden" name="mixId" th:value="${mix.id}"/>
+                            <button type="submit"
+                                    style="width:100%; text-align:left; padding:0.75rem 1rem; background:none; border:none; border-bottom:1px solid #2a2a2a; color:#fff; cursor:pointer; font-size:0.875rem;"
+                                    onmouseover="this.style.background='rgba(124,58,237,0.1)'"
+                                    onmouseout="this.style.background='none'"
+                                    th:text="${pl.title}"></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div>
+                <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:1rem;">
+                    Комментарии <span style="color:#888; font-weight:400;" th:text="'(' + ${#lists.size(comments)} + ')'"></span>
+                </h3>
+
+                <form sec:authorize="isAuthenticated()" th:action="'/mix/' + ${mix.slug} + '/comment'" method="post"
+                      style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
+                    <input type="text" name="content" class="form-input" placeholder="Написать комментарий..." required/>
+                    <button type="submit" class="btn-primary" style="white-space:nowrap;">Отправить</button>
+                </form>
+
+                <div th:if="${comments.isEmpty()}" style="color:#888; font-size:0.875rem;">Комментариев пока нет.</div>
+                <div th:each="comment : ${comments}" style="display:flex; gap:0.75rem; margin-bottom:1.25rem;">
+                    <div style="width:36px; height:36px; border-radius:50%; background:#7c3aed; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8125rem;"
+                         th:text="${comment.author.username.substring(0,1).toUpperCase()}"></div>
+                    <div>
+                        <div style="display:flex; align-items:baseline; gap:0.5rem; margin-bottom:0.25rem;">
+                            <a th:href="'/u/' + ${comment.author.username}" style="font-weight:600; color:#fff; text-decoration:none; font-size:0.875rem;"
+                               th:text="${comment.author.username}"></a>
+                            <span style="color:#888; font-size:0.75rem;" th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
+                        </div>
+                        <p th:text="${comment.content}" style="color:#ccc; font-size:0.875rem; margin:0;"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column: Up Next placeholder -->
+        <div>
+            <h3 style="font-size:1rem; font-weight:600; color:#888; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.05em;">О миксе</h3>
+            <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:1.25rem;">
+                <div style="margin-bottom:0.75rem;">
+                    <span style="color:#888; font-size:0.8125rem;">Автор</span>
+                    <div><a th:href="'/u/' + ${mix.author.username}" style="color:#fff; text-decoration:none; font-size:0.9375rem;" th:text="${mix.author.username}"></a></div>
+                </div>
+                <div th:if="${mix.genre != null}" style="margin-bottom:0.75rem;">
+                    <span style="color:#888; font-size:0.8125rem;">Жанр</span>
+                    <div th:text="${mix.genre}" style="font-size:0.9375rem;"></div>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <span style="color:#888; font-size:0.8125rem;">Прослушиваний</span>
+                    <div th:text="${mix.totalPlays}" style="font-size:0.9375rem;"></div>
+                </div>
+                <div th:if="${mix.uploadedAt != null}">
+                    <span style="color:#888; font-size:0.8125rem;">Загружен</span>
+                    <div th:text="${#temporals.format(mix.uploadedAt, 'dd.MM.yyyy')}" style="font-size:0.9375rem;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    function audioPlayer() {
+        return {
+            playing: false,
+            currentTime: 0,
+            duration: 0,
+            progress: 0,
+            volume: 0.8,
+            activeTrack: null,
+            liked: /*[[${liked}]]*/ false,
+            likeCount: /*[[${likeCount}]]*/ 0,
+            slug: /*[[${mix.slug}]]*/ '',
+
+            getAudio() {
+                return this.$refs.audio;
+            },
+
+            togglePlay() {
+                const audio = this.getAudio();
+                if (!audio.src) {
+                    audio.src = '/api/mixes/' + this.slug + '/stream';
+                    fetch('/api/mixes/' + this.slug + '/play', { method: 'POST' }).catch(() => {});
+                }
+                if (this.playing) {
+                    audio.pause();
+                    this.playing = false;
+                } else {
+                    audio.play().then(() => { this.playing = true; }).catch(() => {});
+                }
+            },
+
+            onTimeUpdate() {
+                const audio = this.getAudio();
+                this.currentTime = audio.currentTime;
+                this.progress = this.duration > 0 ? (audio.currentTime / this.duration) * 100 : 0;
+            },
+
+            onLoaded() {
+                this.duration = this.getAudio().duration || 0;
+                this.getAudio().volume = this.volume;
+            },
+
+            seek(event) {
+                const bar = event.currentTarget;
+                const rect = bar.getBoundingClientRect();
+                const pct = (event.clientX - rect.left) / rect.width;
+                const audio = this.getAudio();
+                if (audio.src && this.duration > 0) {
+                    audio.currentTime = pct * this.duration;
+                }
+            },
+
+            seekToTime(seconds, trackNum) {
+                const audio = this.getAudio();
+                if (!audio.src) {
+                    audio.src = '/api/mixes/' + this.slug + '/stream';
+                    fetch('/api/mixes/' + this.slug + '/play', { method: 'POST' }).catch(() => {});
+                }
+                this.activeTrack = trackNum;
+                audio.currentTime = seconds;
+                audio.play().then(() => { this.playing = true; }).catch(() => {});
+            },
+
+            setVolume() {
+                this.getAudio().volume = this.volume;
+            },
+
+            formatTime(secs) {
+                if (!secs || isNaN(secs)) return '0:00';
+                const m = Math.floor(secs / 60);
+                const s = Math.floor(secs % 60);
+                return m + ':' + (s < 10 ? '0' : '') + s;
+            },
+
+            toggleLike() {
+                fetch('/api/mixes/' + this.slug + '/like', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        this.liked = data.liked;
+                        this.likeCount = data.count;
+                    }).catch(() => {});
+            }
+        }
+    }
+</script>
+</body>
+</html>

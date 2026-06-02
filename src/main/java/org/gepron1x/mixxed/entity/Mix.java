@@ -35,6 +35,8 @@ public class Mix {
 
     private String description;
 
+    private String genre;
+
     private Integer durationSeconds;
 
     private String audioUrl;

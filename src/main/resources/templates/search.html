@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Поиск — MIXXED</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#0f0f0f', card: '#1a1a1a', border: '#2a2a2a', accent: '#7c3aed' } } } }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="bg-bg text-white min-h-screen">
+
+<div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
+
+<main style="max-width:1280px; margin:0 auto; padding:2rem 1.5rem;">
+
+    <!-- Search form -->
+    <form action="/search" method="get" style="margin-bottom:2rem; display:flex; gap:0.75rem; max-width:600px;">
+        <input type="text" name="q" th:value="${query}" class="form-input" placeholder="Поиск миксов, исполнителей..." autofocus/>
+        <button type="submit" class="btn-primary" style="white-space:nowrap;">Найти</button>
+    </form>
+
+    <div style="margin-bottom:2rem;">
+        <h1 style="font-size:1.75rem; font-weight:800; margin-bottom:0.5rem;">
+            Поиск<span th:if="${query != null and !query.isEmpty()}">: «<span th:text="${query}" style="color:#7c3aed;"></span>»</span>
+        </h1>
+        <p th:if="${results != null}" style="color:#888; font-size:0.9375rem;"
+           th:text="${#lists.size(results.content)} + ' из ' + ${results.totalElements} + ' результатов'"></p>
+    </div>
+
+    <!-- Results -->
+    <div th:if="${results != null and !results.isEmpty()}"
+         style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.25rem;">
+        <th:block th:each="mix : ${results.content}">
+            <div th:replace="~{fragments/mix-card :: mixCard(${mix}, true)}"></div>
+        </th:block>
+    </div>
+
+    <!-- No results -->
+    <div th:if="${results != null and results.isEmpty() and query != null and !query.isEmpty()}"
+         style="text-align:center; padding:4rem 0; color:#888;">
+        <div style="font-size:3rem; margin-bottom:1rem;">🔍</div>
+        <p style="font-size:1.125rem;">Ничего не найдено по запросу «<span th:text="${query}"></span>»</p>
+        <p style="font-size:0.875rem; margin-top:0.5rem;">Попробуйте другие ключевые слова</p>
+    </div>
+
+    <div th:if="${query == null or query.isEmpty()}"
+         style="text-align:center; padding:4rem 0; color:#888;">
+        <div style="font-size:3rem; margin-bottom:1rem;">🎵</div>
+        <p style="font-size:1.125rem;">Введите запрос для поиска</p>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${results != null and results.totalPages > 1}"
+         style="margin-top:3rem; display:flex; justify-content:center; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+
+        <!-- Previous -->
+        <a th:if="${results.hasPrevious()}"
+           th:href="@{/search(q=${query},page=${results.number - 1},size=${results.size},sortBy=${param.sortBy ?: 'title'},direction=${param.direction ?: 'asc'})}"
+           class="btn-secondary px-5 py-2.5 rounded-xl flex items-center gap-2">
+            ← Назад
+        </a>
+
+        <span th:if="${!results.hasPrevious()}"
+              class="px-5 py-2.5 text-gray-500 cursor-not-allowed">← Назад</span>
+
+        <!-- Page numbers -->
+        <div th:each="pageNum : ${#numbers.sequence(0, results.totalPages - 1)}"
+             th:if="${(pageNum == 0) or
+                     (pageNum == results.totalPages - 1) or
+                     (pageNum >= results.number - 2 and pageNum <= results.number + 2)}">
+
+            <a th:if="${pageNum != results.number}"
+               th:href="@{/search(q=${query},page=${pageNum},size=${results.size},sortBy=${param.sortBy ?: 'title'},direction=${param.direction ?: 'asc'})}"
+               class="btn-secondary px-4 py-2.5 rounded-xl"
+               th:text="${pageNum + 1}"></a>
+
+            <span th:if="${pageNum == results.number}"
+                  class="px-4 py-2.5 bg-accent text-white rounded-xl font-semibold"
+                  th:text="${pageNum + 1}"></span>
+        </div>
+
+        <!-- Next -->
+        <a th:if="${results.hasNext()}"
+           th:href="@{/search(q=${query},page=${results.number + 1},size=${results.size},sortBy=${param.sortBy ?: 'title'},direction=${param.direction ?: 'asc'})}"
+           class="btn-secondary px-5 py-2.5 rounded-xl flex items-center gap-2">
+            Вперёд →
+        </a>
+
+        <span th:if="${!results.hasNext()}"
+              class="px-5 py-2.5 text-gray-500 cursor-not-allowed">Вперёд →</span>
+    </div>
+</main>
+</body>
+</html>

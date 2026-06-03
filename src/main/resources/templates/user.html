@@ -80,7 +80,7 @@
         <div x-show="tab === 'likes'" style="display:none;">
             <div th:if="${!likedMixes.isEmpty()}"
                  style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.25rem;">
-                <th:block th:each="mix : ${mixes}">
+                <th:block th:each="mix : ${likedMixes}">
                     <div th:replace="~{fragments/mix-card :: mixCard(${mix}, false)}"></div>
                 </th:block>
             </div>

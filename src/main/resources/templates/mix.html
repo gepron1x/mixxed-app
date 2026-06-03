@@ -92,16 +92,17 @@
                 <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden;">
                     <div th:each="track, stat : ${mix.tracks}"
                          class="tracklist-item"
-                         :class="activeTrack === [[${track.position}]] ? 'active' : ''"
-                         @click="seekToTime([[${track.startTimeSeconds}]], [[${track.position}]])"
+                         th:x-bind:class="|activeTrack === ${track.position} ? 'active' : ''|"
+                         th:x-on:click="|seekToTime(${track.startTimeSeconds}, ${track.position})|"
                          style="border-bottom:1px solid #2a2a2a;">
+
                         <span style="color:#888; font-size:0.8125rem; min-width:36px;" th:text="${track.position}"></span>
                         <span style="color:#888; font-size:0.8125rem; min-width:50px;"
                               th:text="${track.startTimeSeconds / 60} + ':' + ${#strings.toString(track.startTimeSeconds % 60).length() == 1 ? '0' + track.startTimeSeconds % 60 : track.startTimeSeconds % 60}"></span>
                         <span style="flex:1; font-size:0.875rem;">
-                            <span th:text="${track.artist}" style="font-weight:500;"></span>
-                            <span th:if="${track.title != null and !track.title.isEmpty()}" style="color:#888;"> — <span th:text="${track.title}"></span></span>
-                        </span>
+                <span th:text="${track.artist}" style="font-weight:500;"></span>
+                <span th:if="${track.title != null and !track.title.isEmpty()}" style="color:#888;"> — <span th:text="${track.title}"></span></span>
+            </span>
                     </div>
                 </div>
             </div>
@@ -140,9 +141,13 @@
 
                 <div th:if="${comments.isEmpty()}" style="color:#888; font-size:0.875rem;">Комментариев пока нет.</div>
                 <div th:each="comment : ${comments}" style="display:flex; gap:0.75rem; margin-bottom:1.25rem;">
-                    <div style="width:36px; height:36px; border-radius:50%; background:#7c3aed; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8125rem;"
-                         th:text="${comment.author.username.substring(0,1).toUpperCase()}"></div>
-                    <div>
+                    <img th:if="${currentUser.profilePictureUrl != null}"
+                         th:src="@{/s3/{key}(key=${currentUser.profilePictureUrl})}"
+                         style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="avatar"/>
+                    <div th:unless="${currentUser != null and currentUser.profilePictureUrl != null}"
+                         style="width:36px; height:36px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.875rem;">
+                        <span th:if="${currentUser != null}" th:text="${currentUser.username.substring(0,1).toUpperCase()}"></span>
+                    </div>
                         <div style="display:flex; align-items:baseline; gap:0.5rem; margin-bottom:0.25rem;">
                             <a th:href="'/u/' + ${comment.author.username}" style="font-weight:600; color:#fff; text-decoration:none; font-size:0.875rem;"
                                th:text="${comment.author.username}"></a>

@@ -158,6 +158,10 @@ public class StorageService {
         }
     }
 
+    public void deleteObject(String key) {
+        s3Client.deleteObject(builder -> builder.bucket(bucket).key(key));
+    }
+
     private void ensureBucket() {
         try {
             s3Client.headBucket(b -> b.bucket(bucket));

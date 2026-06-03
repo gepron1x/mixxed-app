@@ -1,6 +1,7 @@
 package org.gepron1x.mixxed.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.gepron1x.mixxed.entity.Comment;
 import org.gepron1x.mixxed.entity.Mix;
 import org.gepron1x.mixxed.entity.User;
 import org.gepron1x.mixxed.repository.CommentRepository;
@@ -9,7 +10,9 @@ import org.gepron1x.mixxed.repository.MixRepository;
 import org.gepron1x.mixxed.repository.PlaylistRepository;
 import org.gepron1x.mixxed.service.MixService;
 import org.gepron1x.mixxed.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,6 +53,18 @@ public class MixController {
         return "mix";
     }
 
+    @PostMapping("/mix/{slug}/delete")
+    public String delete(@PathVariable String slug, Authentication auth) {
+        Mix mix = mixRepository.findBySlug(slug).orElse(null);
+        if (mix == null) return "redirect:/";
+        User currentUser = userService.getCurrentUser(auth);
+        if(!mix.getAuthor().equals(currentUser) && !currentUser.isAdmin()) {
+            throw new AccessDeniedException("You have no permission to delete this mix.");
+        }
+        mixService.deleteMix(mix);
+        return "redirect:/";
+    }
+
     @PostMapping("/api/mixes/{slug}/like")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable String slug, Authentication auth) {
@@ -61,18 +76,6 @@ public class MixController {
         boolean liked = mixService.toggleLike(currentUser, mix);
         long count = likeRepository.countByMix(mix);
         return ResponseEntity.ok(Map.of("liked", liked, "count", count));
-    }
-
-    @PostMapping("/mix/{slug}/comment")
-    public String addComment(@PathVariable String slug,
-                             @RequestParam String content,
-                             Authentication auth) {
-        User currentUser = userService.getCurrentUser(auth);
-        if (currentUser == null) return "redirect:/login";
-        Mix mix = mixRepository.findBySlug(slug).orElse(null);
-        if (mix == null) return "redirect:/";
-        mixService.addComment(currentUser, mix, content);
-        return "redirect:/mix/" + slug;
     }
 
     @PostMapping("/api/mixes/{slug}/play")

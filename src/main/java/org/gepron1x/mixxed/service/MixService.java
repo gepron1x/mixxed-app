@@ -27,7 +27,6 @@ public class MixService {
 
     @Transactional
     public Mix uploadMix(User author, MixUploadForm form) {
-        System.out.println("Received the form!");
         String slug = generateSlug(form.getTitle());
 
         String audioKey = null;
@@ -99,17 +98,14 @@ public class MixService {
         mixRepository.save(mix);
     }
 
-
     @Transactional
-    public void addComment(User user, Mix mix, String content) {
-        Comment comment = Comment.builder()
-            .mix(mix)
-            .author(user)
-            .content(content)
-            .createdAt(LocalDateTime.now())
-            .build();
-        commentRepository.save(comment);
+    public void deleteMix(Mix mix) {
+        storageService.deleteObject(mix.getAudioUrl());
+        storageService.deleteObject(mix.getCoverUrl());
+        mixRepository.delete(mix);
     }
+
+
 
     private String generateSlug(String title) {
         String base = title.toLowerCase()

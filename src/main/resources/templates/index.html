@@ -56,7 +56,13 @@
     </section>
 
     <section>
-
+        <h2 style="font-size:1.5rem; font-weight:700; margin-bottom:1.5rem;">Популярное</h2>
+        <div th:if="${popular != null and !popular.isEmpty()}"
+             style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.25rem;">
+            <th:block th:each="mix : ${popular}">
+                <div th:replace="~{fragments/mix-card :: mixCard(${mix}, true)}"></div>
+            </th:block>
+        </div>
     </section>
 </main>
 </body>

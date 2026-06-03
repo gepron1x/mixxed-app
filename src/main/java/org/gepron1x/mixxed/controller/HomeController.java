@@ -20,6 +20,7 @@ public class HomeController {
     public String home(Authentication auth, Model model) {
         User currentUser = userService.getCurrentUser(auth);
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("popular", mixRepository.findTop10ByOrderByTotalPlaysDesc());
         return "index";
     }
 }

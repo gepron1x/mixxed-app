@@ -19,6 +19,8 @@ public interface MixRepository extends JpaRepository<Mix, Long> {
 
     Collection<Mix> findByAuthor(User author);
 
+    List<Mix> findTop10ByOrderByTotalPlaysDesc();
+
     Page<Mix> findByTitleContainingIgnoreCaseOrAuthor_UsernameContainingIgnoreCase(
             String title, String username, Pageable pageable);
 }

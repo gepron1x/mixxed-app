@@ -50,6 +50,17 @@
                             <span th:text="${likeCount}"></span> ♥
                         </span>
                     </div>
+                    <sec:authorize access="hasRole('ADMIN') or (${mix.author.id} == ${currentUser?.id})">
+                        <form th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
+                              style="display:inline;"
+                              onsubmit="return confirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.')">
+                            <button type="submit"
+                                    style="background:#ef4444; color:white; border:none; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; gap:0.4rem;">
+                                <span>🗑</span>
+                                <span>Удалить микс</span>
+                            </button>
+                        </form>
+                    </sec:authorize>
                 </div>
             </div>
 
@@ -140,23 +151,43 @@
                 </form>
 
                 <div th:if="${comments.isEmpty()}" style="color:#888; font-size:0.875rem;">Комментариев пока нет.</div>
-                <div th:each="comment : ${comments}" style="display:flex; gap:0.75rem; margin-bottom:1.25rem;">
-                    <img th:if="${currentUser.profilePictureUrl != null}"
-                         th:src="@{/s3/{key}(key=${currentUser.profilePictureUrl})}"
+
+                <div th:each="comment : ${comments}" style="display:flex; gap:0.75rem; margin-bottom:1.25rem; position:relative;">
+                    <!-- Avatar -->
+                    <img th:if="${comment.author.profilePictureUrl != null}"
+                         th:src="@{/s3/{key}(key=${comment.author.profilePictureUrl})}"
                          style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="avatar"/>
-                    <div th:unless="${currentUser != null and currentUser.profilePictureUrl != null}"
+                    <div th:unless="${comment.author.profilePictureUrl != null}"
                          style="width:36px; height:36px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.875rem;">
-                        <span th:if="${currentUser != null}" th:text="${currentUser.username.substring(0,1).toUpperCase()}"></span>
+                        <span th:text="${comment.author.username.substring(0,1).toUpperCase()}"></span>
                     </div>
+
+                    <div style="flex:1;">
                         <div style="display:flex; align-items:baseline; gap:0.5rem; margin-bottom:0.25rem;">
-                            <a th:href="'/u/' + ${comment.author.username}" style="font-weight:600; color:#fff; text-decoration:none; font-size:0.875rem;"
+                            <a th:href="'/u/' + ${comment.author.username}"
+                               style="font-weight:600; color:#fff; text-decoration:none; font-size:0.875rem;"
                                th:text="${comment.author.username}"></a>
-                            <span style="color:#888; font-size:0.75rem;" th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
+                            <span style="color:#888; font-size:0.75rem;"
+                                  th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
                         </div>
                         <p th:text="${comment.content}" style="color:#ccc; font-size:0.875rem; margin:0;"></p>
                     </div>
+
+                    <!-- Delete comment button -->
+                    <sec:authorize access="hasRole('ADMIN') or
+                              (${comment.author.username} == ${currentUser?.username}) or
+                              (${mix.author.username} == ${currentUser?.username})">
+                        <form th:action="'/comment/' + ${comment.id} + '/delete'" method="post"
+                              style="position:absolute; top:0; right:0;"
+                              onsubmit="return confirm('Удалить комментарий?')">
+                            <button type="submit"
+                                    style="background:none; border:none; color:#888; cursor:pointer; font-size:1.25rem; padding:0.25rem; line-height:1;"
+                                    title="Удалить комментарий">🗑</button>
+                        </form>
+                    </sec:authorize>
                 </div>
             </div>
+
         </div>
 
         <!-- Right column: Up Next placeholder -->

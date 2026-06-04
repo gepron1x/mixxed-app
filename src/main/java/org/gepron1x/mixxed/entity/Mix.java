@@ -1,5 +1,6 @@
 package org.gepron1x.mixxed.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,7 @@ public class Mix {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
@@ -51,9 +52,11 @@ public class Mix {
     @OneToMany(mappedBy = "mix", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "mixes")
     private List<Playlist> playlists = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "mix", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Like> likes = new ArrayList<>();
 

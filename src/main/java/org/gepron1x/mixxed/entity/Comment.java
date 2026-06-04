@@ -1,5 +1,6 @@
 package org.gepron1x.mixxed.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mix_id", nullable = false)
+    @JsonIgnore
     private Mix mix;
 
     @ManyToOne(fetch = FetchType.LAZY)

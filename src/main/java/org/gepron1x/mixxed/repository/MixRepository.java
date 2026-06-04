@@ -6,6 +6,8 @@ import org.gepron1x.mixxed.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -23,4 +25,10 @@ public interface MixRepository extends JpaRepository<Mix, Long> {
 
     Page<Mix> findByTitleContainingIgnoreCaseOrAuthor_UsernameContainingIgnoreCase(
             String title, String username, Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(m.totalPlays), 0) FROM Mix m WHERE m.author = :author")
+    int sumTotalPlaysByAuthor(@Param("author") User author);
+
+    @Query(value = "SELECT * FROM mixes WHERE author_id = :authorId ORDER BY total_plays DESC LIMIT 1", nativeQuery = true)
+    Optional<Mix> findMostPopularMixByAuthorId(@Param("authorId") Long authorId);
 }

@@ -45,6 +45,7 @@
                 </form>
                 <a th:if="${isOwn}" href="/settings" class="btn-secondary" style="text-decoration:none; display:inline-block;">Редактировать профиль</a>
                 <a th:if="${!isOwn and currentUser == null}" href="/login" class="btn-primary" style="text-decoration:none; display:inline-block;">Подписаться</a>
+                <a th:href="'/u/' + ${profileUser.username} + '/statistics'" class="btn-primary" style="text-decoration:none; display:inline-block;">Статистика</a>
             </div>
         </div>
     </div>

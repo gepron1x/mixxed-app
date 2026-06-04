@@ -1,9 +1,11 @@
 package org.gepron1x.mixxed.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.gepron1x.mixxed.dto.UserStatistics;
 import org.gepron1x.mixxed.entity.Like;
 import org.gepron1x.mixxed.entity.User;
 import org.gepron1x.mixxed.repository.*;
+import org.gepron1x.mixxed.service.StatisticsService;
 import org.gepron1x.mixxed.service.UserService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class UserProfileController {
     private final PlaylistRepository playlistRepository;
     private final FollowRepository followRepository;
     private final UserService userService;
+    private final StatisticsService statisticsService;
 
     @GetMapping("/u/{username}")
     public String profile(@PathVariable String username, Authentication auth, Model model) {
@@ -54,6 +57,18 @@ public class UserProfileController {
         model.addAttribute("followersCount", followersCount);
         model.addAttribute("followingCount", followingCount);
         return "user";
+    }
+
+    @GetMapping("/u/{username}/statistics")
+    public String statistics(@PathVariable String username, Authentication auth, Model model) {
+        User profileUser = userRepository.findByUsername(username).orElse(null);
+        if (profileUser == null) return "redirect:/";
+        User currentUser = userService.getCurrentUser(auth);
+        model.addAttribute("currentUser", currentUser);
+        UserStatistics statistics = statisticsService.gatherStatistics(profileUser);
+        model.addAttribute("profileUser", profileUser);
+        model.addAttribute("stats", statistics);
+        return "statistics";
     }
 
     @PostMapping("/u/{username}/follow")

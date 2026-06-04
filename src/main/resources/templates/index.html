@@ -63,6 +63,22 @@
                 <div th:replace="~{fragments/mix-card :: mixCard(${mix}, true)}"></div>
             </th:block>
         </div>
+        <div th:if="${popular == null or popular.isEmpty()}" style="color:#888; text-align:center; padding:3rem;">
+            Пока нет миксов.
+        </div>
+    </section>
+
+    <section>
+        <h2 style="font-size:1.5rem; font-weight:700; margin-bottom:1.5rem;">Новые плейлисты</h2>
+        <div th:if="${playlists != null and !playlists.isEmpty()}"
+             style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.25rem;">
+            <th:block th:each="playlist : ${playlists}">
+                <div th:replace="~{fragments/playlist-card :: playlistCard(${playlist}, true)}"></div>
+            </th:block>
+        </div>
+        <div th:if="${playlists == null or playlists.isEmpty()}" style="color:#888; text-align:center; padding:3rem;">
+            Пока нет плейлистов.
+        </div>
     </section>
 </main>
 </body>

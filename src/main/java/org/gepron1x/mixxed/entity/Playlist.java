@@ -3,6 +3,7 @@ package org.gepron1x.mixxed.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,8 @@ public class Playlist {
     private String title;
 
     private String description;
+
+    private LocalDateTime uploadedAt;
 
     @ManyToMany
     @JoinTable(

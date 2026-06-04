@@ -49,7 +49,18 @@
             <span style="color:#7c3aed; font-size:0.75rem; font-weight:700; uppercase; letter-spacing:0.1em;">ПЛЕЙЛИСТ</span>
             <h1 th:text="${playlist.title}" style="font-size:2.5rem; font-weight:900; margin:0.25rem 0 0.75rem 0; line-height:1.1;"></h1>
             <p th:text="${playlist.description}" style="color:#888; font-size:1rem; margin-bottom:1.5rem; max-width:600px;"></p>
+            <form th:if="(${currentUser?.isAdmin() == true}) or (${playlist.authorUsername} == ${currentUser?.username})"
+                  th:action="'/playlist/' + ${playlist.slug} + '/delete'" method="post"
+                  style="display:inline;"
+                  onsubmit="return confirm('Вы действительно хотите удалить этот плейлист? Это действие нельзя отменить.')">
+                <button type="submit"
+                        style="background:#ef4444; color:white; border:none; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; gap:0.4rem;">
+                    <span>🗑</span>
+                    <span>Удалить плейлист</span>
+                </button>
+            </form>
 
+        </div>
             <div style="display:flex; align-items:center; gap:1rem;">
                 <button @click="playAll()"
                         :disabled="mixes.length === 0"
@@ -61,7 +72,6 @@
                 </button>
                 <span style="color:#666;" x-text="mixes.length + ' треков'"></span>
             </div>
-        </div>
     </div>
 
     <div x-show="currentIndex !== null"

@@ -50,28 +50,8 @@
                             <span th:text="${likeCount}"></span> ♥
                         </span>
                     </div>
-                    <div>
-                        <div th:if="(${mix.author.id} == ${currentUser?.id})" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-                            <a th:href="'/mix/edit/' + ${mix.slug}"
-                               style="background: #7c3aed; color: white; border: none; border-radius: 8px; padding: 0.4rem 0.85rem; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none;">
-                                <span>✏️</span>
-                                <span>Редактировать</span>
-                            </a>
-
-                            <form th:if="(${mix.author.isAdmin()}) or (${mix.author.id} == ${currentUser?.id})" th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
-                                  style="display:inline;"
-                                  onsubmit="return confirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.')">
-                                <button type="submit"
-                                        style="background:#ef4444; color:white; border:none; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; gap:0.4rem;">
-                                    <span>🗑</span>
-                                    <span>Удалить микс</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
                 </div>
             </div>
-
             <!-- Audio player -->
             <div class="audio-player" style="margin-bottom:2rem;">
                 <audio x-ref="audio"
@@ -210,6 +190,25 @@
 
         <!-- Right column: Up Next placeholder -->
         <div>
+            <div style="margin-bottom:1rem;">
+                <div th:if="(${mix.author.id} == ${currentUser?.id})" style="display: inline-flex; gap: 0.5rem; align-items: center;">
+                    <a th:href="'/mix/edit/' + ${mix.slug}"
+                       style="background: #7c3aed; color: white; border: none; border-radius: 8px; padding: 0.4rem 0.85rem; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+                        <span>✏️</span>
+                        <span>Редактировать</span>
+                    </a>
+
+                    <form th:if="(${currentUser?.isAdmin() == true}) or (${mix.author.id} == ${currentUser?.id})" th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
+                          style="display:inline;"
+                          onsubmit="return confirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.')">
+                        <button type="submit"
+                                style="background:#ef4444; color:white; border:none; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; gap:0.4rem;">
+                            <span>🗑</span>
+                            <span>Удалить микс</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
             <h3 style="font-size:1rem; font-weight:600; color:#888; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.05em;">О миксе</h3>
             <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:1.25rem;">
                 <div style="margin-bottom:0.75rem;">

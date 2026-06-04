@@ -20,8 +20,8 @@
             <div th:text="${playlist.title}"
                  style="font-weight:600; color:#fff; font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
 
-            <div th:if="${showAuthor and playlist.authorUsername != null}"
-                 th:text="'от ' + ${playlist.authorUsername}"
+            <div th:if="${showAuthor}"
+                 th:text="'от ' + ${playlist.author.username}"
                  style="color:#7c3aed; font-size:0.8125rem; margin-top:0.15rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
 
             <div th:text="${#lists.size(playlist.mixes)} + ' миксов'"

@@ -59,6 +59,8 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      # Mixxed
+      ADMIN_USERNAMES: ${ADMIN_USERNAMES}
     ports:
       - "7080:7080"
     networks:

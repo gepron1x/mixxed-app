@@ -39,6 +39,8 @@ dependencies {
     implementation("org.flywaydb:flyway-core:10.20.0")
     implementation("org.flywaydb:flyway-database-postgresql:10.20.0")
 
+    implementation("org.apache.commons:commons-text:1.15.0")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

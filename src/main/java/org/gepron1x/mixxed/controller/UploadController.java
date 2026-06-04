@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.gepron1x.mixxed.entity.Mix;
 import org.gepron1x.mixxed.entity.User;
 import org.gepron1x.mixxed.form.MixUploadForm;
+import org.gepron1x.mixxed.genre.Genre;
 import org.gepron1x.mixxed.repository.MixRepository;
 import org.gepron1x.mixxed.service.MixService;
 import org.gepron1x.mixxed.service.UserService;
@@ -32,6 +33,7 @@ public class UploadController {
         User currentUser = userService.getCurrentUser(auth);
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("form", new MixUploadForm());
+        model.addAttribute("genres", Genre.genres());
         model.addAttribute("isEdit", false);
         return "upload";
     }
@@ -46,6 +48,7 @@ public class UploadController {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("form", form);
+            model.addAttribute("genres", Genre.genres());
             model.addAttribute("currentUser", currentUser);
             model.addAttribute("isEdit", false);
             return "upload";

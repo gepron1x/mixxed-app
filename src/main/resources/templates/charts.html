@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Топ-чарт — MIXXED</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#0f0f0f', card: '#1a1a1a', border: '#2a2a2a', accent: '#7c3aed' } } } }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="bg-bg text-white min-h-screen">
+
+<div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
+
+<main style="max-width:1000px; margin:0 auto; padding:2rem 1.5rem;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:gap-1rem;">
+        <div>
+            <h1 style="font-size:2rem; font-weight:800;">Топ-чарт <span style="color:#7c3aed;">MIXXED</span></h1>
+            <p style="color:#888; margin-top:0.25rem;">Самые популярные миксы платформы</p>
+        </div>
+
+        <!-- Genre filter -->
+        <form action="/charts" method="get" style="display:flex; align-items:center; gap:0.75rem;">
+            <select name="genre" onchange="this.form.submit()"
+                    style="background:#1a1a1a; border:1px solid #2a2a2a; color:#fff; border-radius:8px; padding:0.5rem 1rem; font-size:0.875rem; cursor:pointer; outline:none;">
+                <option value="" th:selected="${selectedGenre == null or selectedGenre.isEmpty()}">Все жанры</option>
+                <option th:each="g : ${genres}" th:value="${g.fullName}" th:text="${g.fullName}"
+                        th:selected="${g.fullName == selectedGenre}"></option>
+            </select>
+            <a th:if="${selectedGenre != null and !selectedGenre.isEmpty()}" href="/charts"
+               style="color:#888; font-size:0.875rem; text-decoration:none;">× Сбросить</a>
+        </form>
+    </div>
+
+    <!-- Chart table -->
+    <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden;">
+        <div th:if="${mixes.isEmpty()}" style="padding:3rem; text-align:center; color:#888;">
+            Нет миксов в этом жанре.
+        </div>
+
+        <div th:each="mix, stat : ${mixes}"
+             style="display:flex; align-items:center; gap:1.25rem; padding:1rem 1.25rem; border-bottom:1px solid #2a2a2a; transition:background 0.15s;"
+             onmouseover="this.style.background='rgba(124,58,237,0.05)'"
+             onmouseout="this.style.background='transparent'">
+
+            <!-- Rank -->
+            <div style="width:36px; text-align:center; flex-shrink:0;">
+                <span th:if="${stat.index < 3}"
+                      th:text="${stat.index == 0 ? '🥇' : stat.index == 1 ? '🥈' : '🥉'}"
+                      style="font-size:1.25rem;"></span>
+                <span th:unless="${stat.index < 3}"
+                      th:text="${stat.count}"
+                      style="color:#888; font-size:0.9375rem; font-weight:600;"></span>
+            </div>
+
+            <!-- Cover -->
+            <div style="width:52px; height:52px; border-radius:8px; overflow:hidden; flex-shrink:0; background:#2a2a2a;">
+                <img th:if="${mix.coverUrl != null}" th:src="'/s3/' + ${mix.coverUrl}"
+                     alt="cover" style="width:100%; height:100%; object-fit:cover;"/>
+                <div th:unless="${mix.coverUrl != null}"
+                     style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">🎵</div>
+            </div>
+
+            <!-- Title + author -->
+            <div style="flex:1; min-width:0;">
+                <a th:href="'/mix/' + ${mix.slug}"
+                   style="font-weight:600; color:#fff; text-decoration:none; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                   th:text="${mix.title}"></a>
+                <a th:href="'/u/' + ${mix.author.username}"
+                   style="color:#888; font-size:0.875rem; text-decoration:none;"
+                   th:text="${mix.author.username}"></a>
+            </div>
+
+            <!-- Genre badge -->
+            <div style="flex-shrink:0;">
+                <span th:if="${mix.genre != null}" class="genre-badge" th:text="${mix.genre}"></span>
+            </div>
+
+            <!-- Duration -->
+            <div style="color:#888; font-size:0.875rem; flex-shrink:0; min-width:50px; text-align:right;"
+                 th:if="${mix.durationSeconds != null}"
+                 th:text="${mix.durationSeconds / 60} + ':' + ${#strings.toString(mix.durationSeconds % 60).length() == 1 ? '0' + mix.durationSeconds % 60 : mix.durationSeconds % 60}">
+            </div>
+
+            <!-- Plays -->
+            <div style="color:#fff; font-size:0.875rem; font-weight:600; flex-shrink:0; min-width:80px; text-align:right;"
+                 th:text="${mix.totalPlays} + ' ♪'"></div>
+
+            <!-- Play button -->
+            <a th:href="'/mix/' + ${mix.slug}"
+               style="width:36px; height:36px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; text-decoration:none; flex-shrink:0; font-size:0.875rem;">▶</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

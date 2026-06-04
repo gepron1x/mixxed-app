@@ -31,4 +31,7 @@ public interface MixRepository extends JpaRepository<Mix, Long> {
 
     @Query(value = "SELECT * FROM mixes WHERE author_id = :authorId ORDER BY total_plays DESC LIMIT 1", nativeQuery = true)
     Optional<Mix> findMostPopularMixByAuthorId(@Param("authorId") Long authorId);
+
+    List<Mix> findByGenreOrderByTotalPlaysDesc(String genre);
+    List<Mix> findAllByOrderByTotalPlaysDesc();
 }

@@ -83,14 +83,9 @@
                     <select name="genre" th:value="${form.genre}"
                             style="background:#1a1a1a; border:1px solid #2a2a2a; color:#fff; border-radius:8px; padding:0.625rem 1rem; width:100%; outline:none; font-size:0.9375rem;">
                         <option value="">— Выберите жанр —</option>
-                        <option value="House" th:selected="${form.genre == 'House'}">House</option>
-                        <option value="Techno" th:selected="${form.genre == 'Techno'}">Techno</option>
-                        <option value="Trance" th:selected="${form.genre == 'Trance'}">Trance</option>
-                        <option value="Drum and Bass" th:selected="${form.genre == 'Drum and Bass'}">Drum and Bass</option>
-                        <option value="Dubstep" th:selected="${form.genre == 'Dubstep'}">Dubstep</option>
-                        <option value="Hip-Hop" th:selected="${form.genre == 'Hip-Hop'}">Hip-Hop</option>
-                        <option value="Ambient" th:selected="${form.genre == 'Ambient'}">Ambient</option>
-                        <option value="Другое" th:selected="${form.genre == 'Другое'}">Другое</option>
+                        <th:block th:each="genre : ${genres}">
+                            <option th:value="${genre.fullName}" th:text="${genre.fullName}" th:selected="${form.genre == genre.fullName}"></option>
+                        </th:block>
                     </select>
                 </div>
 

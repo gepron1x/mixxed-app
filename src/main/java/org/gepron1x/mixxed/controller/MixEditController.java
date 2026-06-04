@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.gepron1x.mixxed.entity.Mix;
 import org.gepron1x.mixxed.entity.User;
 import org.gepron1x.mixxed.form.MixUploadForm;
+import org.gepron1x.mixxed.genre.Genre;
 import org.gepron1x.mixxed.repository.MixRepository;
 import org.gepron1x.mixxed.service.MixService;
 import org.gepron1x.mixxed.service.UserService;
@@ -53,6 +54,7 @@ public class MixEditController {
 
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("form", form);
+        model.addAttribute("genres", Genre.genres());
         model.addAttribute("mixSlug", mix.getSlug());
         model.addAttribute("existingTracks", form.getTracks());
         model.addAttribute("coverUrl", mix.getCoverUrl() == null ? null : "/s3/" + mix.getCoverUrl());
@@ -73,6 +75,7 @@ public class MixEditController {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("form", form);
+            model.addAttribute("genres", Genre.genres());
             model.addAttribute("currentUser", currentUser);
             model.addAttribute("isEdit", true);
             model.addAttribute("mixSlug", slug);

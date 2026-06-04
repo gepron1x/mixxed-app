@@ -50,17 +50,25 @@
                             <span th:text="${likeCount}"></span> ♥
                         </span>
                     </div>
-                    <sec:authorize access="hasRole('ADMIN') or (${mix.author.id} == ${currentUser?.id})">
-                        <form th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
-                              style="display:inline;"
-                              onsubmit="return confirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.')">
-                            <button type="submit"
-                                    style="background:#ef4444; color:white; border:none; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; gap:0.4rem;">
-                                <span>🗑</span>
-                                <span>Удалить микс</span>
-                            </button>
-                        </form>
-                    </sec:authorize>
+                    <div>
+                        <div th:if="(${mix.author.id} == ${currentUser?.id})" style="display: inline-flex; gap: 0.5rem; align-items: center;">
+                            <a th:href="'/mix/edit/' + ${mix.slug}"
+                               style="background: #7c3aed; color: white; border: none; border-radius: 8px; padding: 0.4rem 0.85rem; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+                                <span>✏️</span>
+                                <span>Редактировать</span>
+                            </a>
+
+                            <form th:if="(${mix.author.isAdmin()}) or (${mix.author.id} == ${currentUser?.id})" th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.')">
+                                <button type="submit"
+                                        style="background:#ef4444; color:white; border:none; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; gap:0.4rem;">
+                                    <span>🗑</span>
+                                    <span>Удалить микс</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
 

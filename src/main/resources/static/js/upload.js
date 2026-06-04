@@ -1,8 +1,8 @@
-function uploadForm() {
+function uploadForm(initialTracks = [], initialCover = null) {
     return {
-        tracks: [],
+        tracks: initialTracks,
         audioName: '',
-        coverPreview: null,
+        coverPreview: initialCover,
         submitting: false,
 
         addTrack() {

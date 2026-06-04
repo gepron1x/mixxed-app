@@ -1,5 +1,6 @@
 package org.gepron1x.mixxed.service;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.gepron1x.mixxed.entity.*;
 import org.gepron1x.mixxed.form.MixUploadForm;
@@ -7,6 +8,7 @@ import org.gepron1x.mixxed.repository.CommentRepository;
 import org.gepron1x.mixxed.repository.FollowRepository;
 import org.gepron1x.mixxed.repository.LikeRepository;
 import org.gepron1x.mixxed.repository.MixRepository;
+import org.gepron1x.mixxed.util.TimeUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,26 @@ public class MixService {
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
     private final StorageService storageService;
+
+
+    @Nullable
+    private List<MixTrack> mapTracks(Mix mix, MixUploadForm form) {
+        if (form.getTracks() == null) return null;
+        List<MixTrack> tracks = new ArrayList<>();
+        for (int i = 0; i < form.getTracks().size(); i++) {
+            MixUploadForm.TrackEntry entry = form.getTracks().get(i);
+            if (entry.getArtist() == null || entry.getArtist().isBlank()) continue;
+            MixTrack track = MixTrack.builder()
+                    .mix(mix)
+                    .position(i + 1)
+                    .startTimeSeconds(TimeUtil.parseTime(entry.getStartTime()))
+                    .artist(entry.getArtist())
+                    .title(entry.getTitle() != null ? entry.getTitle() : "")
+                    .build();
+            tracks.add(track);
+        }
+        return tracks;
+    }
 
     @Transactional
     public Mix uploadMix(User author, MixUploadForm form) {
@@ -59,25 +81,36 @@ public class MixService {
 
         mix = mixRepository.save(mix);
 
-        if (form.getTracks() != null) {
-            List<MixTrack> tracks = new ArrayList<>();
-            for (int i = 0; i < form.getTracks().size(); i++) {
-                MixUploadForm.TrackEntry entry = form.getTracks().get(i);
-                if (entry.getArtist() == null || entry.getArtist().isBlank()) continue;
-                MixTrack track = MixTrack.builder()
-                    .mix(mix)
-                    .position(i + 1)
-                    .startTimeSeconds(parseTime(entry.getStartTime()))
-                    .artist(entry.getArtist())
-                    .title(entry.getTitle() != null ? entry.getTitle() : "")
-                    .build();
-                tracks.add(track);
-            }
-            mix.setTracks(tracks);
-            mix = mixRepository.save(mix);
+        mix.setTracks(mapTracks(mix, form));
+        return mixRepository.save(mix);
+    }
+
+    @Transactional
+    public Mix updateMix(Mix mix, MixUploadForm form) {
+        if(form.getTitle() != null) mix.setTitle(form.getTitle());
+        if(form.getDescription() != null) mix.setDescription(form.getDescription());
+
+        if (form.getAudioFile() != null && !form.getAudioFile().isEmpty()) {
+            String audioKey = mix.getAudioUrl() != null ? mix.getAudioUrl() :
+                    "audio/" + mix.getAuthor().getId() + "/" + UUID.randomUUID();
+            storageService.uploadAudio(form.getAudioFile(), audioKey);
+        }
+        if (form.getCoverFile() != null && !form.getCoverFile().isEmpty()) {
+            String coverKey = mix.getCoverUrl() != null ? mix.getCoverUrl() :
+                    "covers/" + mix.getAuthor().getId() + "/" + UUID.randomUUID();
+            storageService.uploadImage(form.getCoverFile(), coverKey);
         }
 
-        return mix;
+        if(form.getGenre() != null) mix.setGenre(form.getGenre());
+
+
+        List<MixTrack> newTracks = mapTracks(mix, form);
+        mix.getTracks().clear();
+        if (newTracks != null) {
+            mix.getTracks().addAll(newTracks);
+        }
+
+        return mixRepository.save(mix);
     }
 
     @Transactional
@@ -123,16 +156,4 @@ public class MixService {
         return slug;
     }
 
-    private int parseTime(String time) {
-        if (time == null || time.isBlank()) return 0;
-        try {
-            String[] parts = time.split(":");
-            if (parts.length == 2) {
-                return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
-            }
-            return Integer.parseInt(time);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
 }

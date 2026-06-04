@@ -21,7 +21,6 @@ function uploadForm() {
             reader.readAsDataURL(file);
         },
 
-        // === Новый метод: парсинг .cue файла ===
         parseCueFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -75,7 +74,6 @@ function uploadForm() {
 
             if (currentTrack) tracks.push(currentTrack);
 
-            // Если ничего не распарсилось — возвращаем пустой массив
             return tracks.length > 0 ? tracks : [];
         }
     }

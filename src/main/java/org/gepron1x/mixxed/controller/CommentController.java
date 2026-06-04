@@ -1,6 +1,7 @@
 package org.gepron1x.mixxed.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.gepron1x.mixxed.dto.CommentDTO;
 import org.gepron1x.mixxed.entity.Comment;
 import org.gepron1x.mixxed.entity.Mix;
 import org.gepron1x.mixxed.entity.User;
@@ -30,29 +31,29 @@ public class CommentController {
 
 
     @PostMapping("/mix/{slug}/comment")
-    public String addComment(@PathVariable String slug,
-                             @RequestParam String content,
-                             Authentication auth) {
+    public ResponseEntity<CommentDTO> addComment(@PathVariable String slug,
+                                                 @RequestParam String content,
+                                                 Authentication auth) {
         User currentUser = userService.getCurrentUser(auth);
-        if (currentUser == null) return "redirect:/login";
+        if (currentUser == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         Mix mix = mixRepository.findBySlug(slug).orElse(null);
-        if (mix == null) return "redirect:/";
-        this.commentService.addComment(currentUser, mix, content);
-        return "redirect:/mix/" + slug;
+        if (mix == null) return ResponseEntity.notFound().build();
+        CommentDTO comment = CommentDTO.create(
+                this.commentService.addComment(currentUser, mix, content), true
+        );
+        return ResponseEntity.ok(comment);
     }
 
 
     @DeleteMapping("/comment/{id}")
-    public ResponseEntity<Void> removeComment(
-            @RequestParam long id,
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable long id,
             Authentication auth) {
         User currentUser = userService.getCurrentUser(auth);
         Comment comment = commentRepository.findById(id).orElse(null);
         if(comment == null) return ResponseEntity.notFound().build();
 
-        if(!(currentUser.isAdmin() &&
-                comment.getAuthor().equals(currentUser) &&
-                comment.getMix().getAuthor().equals(currentUser))
+        if(!commentService.canDelete(currentUser, comment.getMix(), comment)
         ) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }

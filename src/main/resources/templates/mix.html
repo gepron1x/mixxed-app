@@ -16,7 +16,7 @@
 <div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
 
 <main style="max-width:1100px; margin:0 auto; padding:2rem 1.5rem;">
-    <div style="display:grid; grid-template-columns:1fr 340px; gap:2rem;" x-data="audioPlayer()">
+    <div style="display:grid; grid-template-columns:1fr 340px; gap:2rem;" x-data="audioPlayer(window.mixPlayerInit)">
 
         <!-- Left column -->
         <div>
@@ -139,53 +139,63 @@
             </div>
 
             <!-- Comments -->
-            <div>
+            <div x-data="commentsManager(window.comments)" class="mt-8">
                 <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:1rem;">
-                    Комментарии <span style="color:#888; font-weight:400;" th:text="'(' + ${#lists.size(comments)} + ')'"></span>
+                    Комментарии <span style="color:#888; font-weight:400;" x-text="'(' + comments.length + ')'"></span>
                 </h3>
 
-                <form sec:authorize="isAuthenticated()" th:action="'/mix/' + ${mix.slug} + '/comment'" method="post"
-                      style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
-                    <input type="text" name="content" class="form-input" placeholder="Написать комментарий..." required/>
+                <form sec:authorize="isAuthenticated()"
+                      th:action="'/mix/' + ${mix.slug} + '/comment'"
+                      method="post"
+                      style="display:flex; gap:0.75rem; margin-bottom:1.5rem;"
+                      @submit.prevent="addComment($event)">
+
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                    <input type="text" name="content"
+                           x-model="newComment"
+                           class="form-input flex-1"
+                           placeholder="Написать комментарий..."
+                           required/>
                     <button type="submit" class="btn-primary" style="white-space:nowrap;">Отправить</button>
                 </form>
 
-                <div th:if="${comments.isEmpty()}" style="color:#888; font-size:0.875rem;">Комментариев пока нет.</div>
-
-                <div th:each="comment : ${comments}" style="display:flex; gap:0.75rem; margin-bottom:1.25rem; position:relative;">
-                    <!-- Avatar -->
-                    <img th:if="${comment.author.profilePictureUrl != null}"
-                         th:src="@{/s3/{key}(key=${comment.author.profilePictureUrl})}"
-                         style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="avatar"/>
-                    <div th:unless="${comment.author.profilePictureUrl != null}"
-                         style="width:36px; height:36px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.875rem;">
-                        <span th:text="${comment.author.username.substring(0,1).toUpperCase()}"></span>
-                    </div>
-
-                    <div style="flex:1;">
-                        <div style="display:flex; align-items:baseline; gap:0.5rem; margin-bottom:0.25rem;">
-                            <a th:href="'/u/' + ${comment.author.username}"
-                               style="font-weight:600; color:#fff; text-decoration:none; font-size:0.875rem;"
-                               th:text="${comment.author.username}"></a>
-                            <span style="color:#888; font-size:0.75rem;"
-                                  th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
-                        </div>
-                        <p th:text="${comment.content}" style="color:#ccc; font-size:0.875rem; margin:0;"></p>
-                    </div>
-
-                    <!-- Delete comment button -->
-                    <sec:authorize access="hasRole('ADMIN') or
-                              (${comment.author.username} == ${currentUser?.username}) or
-                              (${mix.author.username} == ${currentUser?.username})">
-                        <form th:action="'/comment/' + ${comment.id} + '/delete'" method="post"
-                              style="position:absolute; top:0; right:0;"
-                              onsubmit="return confirm('Удалить комментарий?')">
-                            <button type="submit"
-                                    style="background:none; border:none; color:#888; cursor:pointer; font-size:1.25rem; padding:0.25rem; line-height:1;"
-                                    title="Удалить комментарий">🗑</button>
-                        </form>
-                    </sec:authorize>
+                <div x-show="comments.length === 0" style="color:#888; font-size:0.875rem; text-align:center; padding:2rem 0;">
+                    Комментариев пока нет. Будьте первым!
                 </div>
+
+                <!-- Динамический список комментариев -->
+                <template x-for="comment in comments" :key="comment.id">
+                    <div class="comment-item"
+                         style="display:flex; gap:0.75rem; margin-bottom:1.25rem; position:relative;"
+                         :id="'comment-' + comment.id">
+
+                        <!-- Avatar -->
+                        <img :src="comment.profilePictureUrl ? '/s3/' + comment.profilePictureUrl : null"
+                             style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="avatar"
+                             x-show="comment.profilePictureUrl"/>
+                        <div x-show="!comment.profilePictureUrl"
+                             style="width:36px; height:36px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.875rem;">
+                            <span x-text="comment.authorName.substring(0,1).toUpperCase()"></span>
+                        </div>
+
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:baseline; gap:0.5rem; margin-bottom:0.25rem;">
+                                <a :href="'/u/' + comment.authorName"
+                                   style="font-weight:600; color:#fff; text-decoration:none; font-size:0.875rem;"
+                                   x-text="comment.authorName"></a>
+                                <span style="color:#888; font-size:0.75rem;"
+                                      x-text="formatDate(comment.createdAt)"></span>
+                            </div>
+                            <p x-text="comment.content" style="color:#ccc; font-size:0.875rem; margin:0;"></p>
+                        </div>
+
+                        <!-- Delete button -->
+                        <button @click="deleteComment(comment.id)"
+                                x-show="comment.canDelete"
+                                style="background:none; border:none; color:#888; cursor:pointer; font-size:1.25rem; padding:0.25rem; line-height:1;"
+                                title="Удалить комментарий">🗑</button>
+                    </div>
+                </template>
             </div>
 
         </div>
@@ -214,91 +224,15 @@
         </div>
     </div>
 </main>
-
+<script th:src="@{/js/mix/player.js}"></script>
+<script th:src="@{/js/mix/comments.js}"></script>
 <script th:inline="javascript">
-    function audioPlayer() {
-        return {
-            playing: false,
-            currentTime: 0,
-            duration: 0,
-            progress: 0,
-            volume: 0.8,
-            activeTrack: null,
-            liked: /*[[${liked}]]*/ false,
-            likeCount: /*[[${likeCount}]]*/ 0,
-            slug: /*[[${mix.slug}]]*/ '',
-
-            getAudio() {
-                return this.$refs.audio;
-            },
-
-            togglePlay() {
-                const audio = this.getAudio();
-                if (!audio.src) {
-                    audio.src = '/api/mixes/' + this.slug + '/stream';
-                    fetch('/api/mixes/' + this.slug + '/play', { method: 'POST' }).catch(() => {});
-                }
-                if (this.playing) {
-                    audio.pause();
-                    this.playing = false;
-                } else {
-                    audio.play().then(() => { this.playing = true; }).catch(() => {});
-                }
-            },
-
-            onTimeUpdate() {
-                const audio = this.getAudio();
-                this.currentTime = audio.currentTime;
-                this.progress = this.duration > 0 ? (audio.currentTime / this.duration) * 100 : 0;
-            },
-
-            onLoaded() {
-                this.duration = this.getAudio().duration || 0;
-                this.getAudio().volume = this.volume;
-            },
-
-            seek(event) {
-                const bar = event.currentTarget;
-                const rect = bar.getBoundingClientRect();
-                const pct = (event.clientX - rect.left) / rect.width;
-                const audio = this.getAudio();
-                if (audio.src && this.duration > 0) {
-                    audio.currentTime = pct * this.duration;
-                }
-            },
-
-            seekToTime(seconds, trackNum) {
-                const audio = this.getAudio();
-                if (!audio.src) {
-                    audio.src = '/api/mixes/' + this.slug + '/stream';
-                    fetch('/api/mixes/' + this.slug + '/play', { method: 'POST' }).catch(() => {});
-                }
-                this.activeTrack = trackNum;
-                audio.currentTime = seconds;
-                audio.play().then(() => { this.playing = true; }).catch(() => {});
-            },
-
-            setVolume() {
-                this.getAudio().volume = this.volume;
-            },
-
-            formatTime(secs) {
-                if (!secs || isNaN(secs)) return '0:00';
-                const m = Math.floor(secs / 60);
-                const s = Math.floor(secs % 60);
-                return m + ':' + (s < 10 ? '0' : '') + s;
-            },
-
-            toggleLike() {
-                fetch('/api/mixes/' + this.slug + '/like', { method: 'POST' })
-                    .then(r => r.json())
-                    .then(data => {
-                        this.liked = data.liked;
-                        this.likeCount = data.count;
-                    }).catch(() => {});
-            }
-        }
-    }
+    window.mixPlayerInit = {
+        liked: /*[[${liked}]]*/ false,
+        likeCount: /*[[${likeCount}]]*/ 0,
+        slug: /*[[${mix.slug}]]*/ ''
+    };
+    window.comments = /*[[${comments}]]*/ []
 </script>
 </body>
 </html>

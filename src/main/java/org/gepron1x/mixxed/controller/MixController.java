@@ -1,6 +1,8 @@
 package org.gepron1x.mixxed.controller;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.gepron1x.mixxed.dto.CommentDTO;
 import org.gepron1x.mixxed.entity.Comment;
 import org.gepron1x.mixxed.entity.Mix;
 import org.gepron1x.mixxed.entity.User;
@@ -8,6 +10,7 @@ import org.gepron1x.mixxed.repository.CommentRepository;
 import org.gepron1x.mixxed.repository.LikeRepository;
 import org.gepron1x.mixxed.repository.MixRepository;
 import org.gepron1x.mixxed.repository.PlaylistRepository;
+import org.gepron1x.mixxed.service.CommentService;
 import org.gepron1x.mixxed.service.MixService;
 import org.gepron1x.mixxed.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -26,6 +29,7 @@ public class MixController {
 
     private final MixRepository mixRepository;
     private final CommentRepository commentRepository;
+    private final CommentService commentService;
     private final LikeRepository likeRepository;
     private final PlaylistRepository playlistRepository;
     private final MixService mixService;
@@ -39,7 +43,12 @@ public class MixController {
         User currentUser = userService.getCurrentUser(auth);
         boolean liked = currentUser != null && likeRepository.existsByUserAndMix(currentUser, mix);
         long likeCount = likeRepository.countByMix(mix);
-        var comments = commentRepository.findByMixOrderByCreatedAtDesc(mix);
+
+        var comments = commentRepository.findByMixOrderByCreatedAtDesc(mix).stream().map(comment ->
+                CommentDTO.create(comment,
+                        commentService.canDelete(currentUser, mix, comment)
+                )
+        ).toList();
 
         model.addAttribute("mix", mix);
         model.addAttribute("currentUser", currentUser);

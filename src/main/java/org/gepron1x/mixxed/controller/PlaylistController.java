@@ -46,6 +46,17 @@ public class PlaylistController {
         return "redirect:/playlist/" + playlist.getSlug();
     }
 
+    @PostMapping("/playlist/{slug}/delete")
+    public String deletePlaylist(@PathVariable String slug,
+                                 Authentication auth) {
+        User currentUser = userService.getCurrentUser(auth);
+        if (currentUser == null) return "redirect:/login";
+        Playlist playlist = playlistRepository.findBySlug(slug).orElse(null);
+        if (playlist == null) return "redirect:/";
+        playlistRepository.delete(playlist);
+        return "redirect:/u/" + playlist.getAuthor().getUsername();
+    }
+
     @PostMapping("/playlist/{slug}/add")
     public String addToPlaylist(@PathVariable String slug,
                                 @RequestParam Long mixId,

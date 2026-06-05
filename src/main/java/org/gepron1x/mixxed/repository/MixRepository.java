@@ -34,4 +34,15 @@ public interface MixRepository extends JpaRepository<Mix, Long> {
 
     List<Mix> findByGenreOrderByTotalPlaysDesc(String genre);
     List<Mix> findAllByOrderByTotalPlaysDesc();
+
+    @Query("SELECT m FROM Mix m ORDER BY m.uploadedAt DESC")
+    List<Mix> findRecentCandidates(Pageable pageable);
+
+    @Query("SELECT m FROM Mix m WHERE m.author.id IN :authorIds ORDER BY m.uploadedAt DESC")
+    List<Mix> findByAuthorIds(@Param("authorIds") List<Long> authorIds);
+
+    @Query("SELECT m FROM Mix m WHERE m.genre = :genre AND m.id NOT IN :excludeIds ORDER BY m.totalPlays DESC")
+    List<Mix> findByGenreExcluding(@Param("genre") String genre,
+                                   @Param("excludeIds") List<Long> excludeIds,
+                                   Pageable pageable);
 }

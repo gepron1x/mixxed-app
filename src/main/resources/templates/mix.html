@@ -190,11 +190,11 @@
         <!-- Right column -->
         <div style="width:320px; flex-shrink:0;">
             <div class="flex gap-2 mb-4">
-                <div th:if="(${mix.author.id} == ${currentUser?.id})" class="flex gap-2 items-center">
-                    <a th:href="'/mix/edit/' + ${mix.slug}" class="btn-edit">
+                <div class="flex gap-2 items-center">
+                    <a th:if="${mix.author.id == currentUser?.id}" th:href="'/mix/edit/' + ${mix.slug}" class="btn-edit">
                         <span>Редактировать</span>
                     </a>
-                    <form th:if="(${currentUser?.isAdmin() == true}) or (${mix.author.id} == ${currentUser?.id})"
+                    <form th:if="${currentUser?.isAdmin() or (mix.author.id == currentUser?.id)}"
                           th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
                           x-data
                           @submit.prevent="showConfirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.', 'Удалить микс')

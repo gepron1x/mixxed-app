@@ -2,55 +2,49 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <nav th:fragment="navbar(currentUser)" class="navbar">
-    <div style="max-width:1280px; margin:0 auto; padding:0 1.5rem; height:64px; display:flex; align-items:center; gap:1.5rem;">
-        <a href="/" style="font-size:1.25rem; font-weight:800; color:#7c3aed; text-decoration:none; letter-spacing:0.05em; flex-shrink:0;">MIXXED</a>
+    <div class="flex items-center gap-6 max-w-[1280px] mx-auto px-6 h-16">
 
-        <div style="display:flex; gap:0.5rem; flex-shrink:0;">
-            <a href="/" style="color:#888; text-decoration:none; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.875rem; transition:color 0.2s;"
-               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">Главная</a>
-            <a href="/charts" style="color:#888; text-decoration:none; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.875rem;"
-               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">Чарты</a>
-            <a href="/recommendations" style="color:#888; text-decoration:none; padding:0.4rem 0.75rem; border-radius:6px; font-size:0.875rem;"
-               onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">Для вас</a>
+        <a href="/" class="brand">MIXXED</a>
+
+        <div class="flex gap-1 flex-shrink-0">
+            <a href="/" class="nav-link">Главная</a>
+            <a href="/charts" class="nav-link">Чарты</a>
+            <a href="/recommendations" class="nav-link">Для вас</a>
         </div>
 
-        <form action="/search" method="get" style="flex:1; max-width:400px;">
-            <input type="text" name="q" placeholder="Поиск миксов, исполнителей..."
-                   class="form-input" style="padding:0.5rem 1rem; font-size:0.875rem;"/>
+        <form action="/search" method="get" class="flex-1 max-w-[400px]">
+            <input type="text" name="q" placeholder="Поиск миксов, исполнителей..." class="nav-search"/>
         </form>
 
-        <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
-            <a sec:authorize="isAuthenticated()" href="/upload"
-               style="background:#7c3aed; color:white; text-decoration:none; padding:0.5rem 1rem; border-radius:8px; font-size:0.875rem; font-weight:500; white-space:nowrap;">
+        <div class="flex items-center gap-3 ml-auto">
+
+            <a sec:authorize="isAuthenticated()" href="/upload" class="btn-primary text-sm py-2 px-4">
                 + Загрузить
             </a>
 
-            <div sec:authorize="!isAuthenticated()" style="display:flex; gap:0.5rem;">
-                <a href="/login" style="color:#888; text-decoration:none; padding:0.5rem 1rem; border-radius:8px; font-size:0.875rem; border:1px solid #2a2a2a;">
-                    Войти
-                </a>
-                <a href="/register" style="background:#7c3aed; color:white; text-decoration:none; padding:0.5rem 1rem; border-radius:8px; font-size:0.875rem;">
-                    Регистрация
-                </a>
+            <div sec:authorize="!isAuthenticated()" class="flex gap-2">
+                <a href="/login" class="btn-secondary text-sm py-2 px-4">Войти</a>
+                <a href="/register" class="btn-primary text-sm py-2 px-4">Регистрация</a>
             </div>
 
-            <div sec:authorize="isAuthenticated()" style="display:flex; align-items:center; gap:0.5rem;">
+            <div sec:authorize="isAuthenticated()" class="flex items-center gap-2">
                 <a th:if="${currentUser != null}" th:href="'/u/' + ${currentUser.username}"
-                   style="display:flex; align-items:center; gap:0.5rem; text-decoration:none; color:#fff;">
+                   class="flex items-center gap-2 no-underline text-white">
                     <img th:if="${currentUser.profilePictureUrl != null}"
                          th:src="@{/s3/{key}(key=${currentUser.profilePictureUrl})}"
-                         style="width:32px; height:32px; border-radius:50%; object-fit:cover;" alt="avatar"/>
+                         class="w-8 h-8 rounded-full object-cover" alt="avatar"/>
                     <div th:unless="${currentUser != null and currentUser.profilePictureUrl != null}"
-                         style="width:32px; height:32px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.875rem;">
+                         class="avatar-placeholder w-8 h-8 text-xs">
                         <span th:if="${currentUser != null}" th:text="${currentUser.username.substring(0,1).toUpperCase()}"></span>
                     </div>
-                    <span th:if="${currentUser != null}" th:text="${currentUser.username}" style="font-size:0.875rem;"></span>
+                    <span th:if="${currentUser != null}" th:text="${currentUser.username}" class="text-sm hidden sm:inline"></span>
                 </a>
-                <a href="/settings" style="color:#888; text-decoration:none; font-size:0.875rem; padding:0.25rem 0.5rem;">⚙</a>
-                <form th:action="@{/logout}" method="post" style="margin:0;">
-                    <button type="submit" style="background:none; border:none; color:#888; cursor:pointer; font-size:0.875rem;">Выйти</button>
+                <a href="/settings" class="nav-link">⚙</a>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="nav-link">Выйти</button>
                 </form>
             </div>
+
         </div>
     </div>
 </nav>

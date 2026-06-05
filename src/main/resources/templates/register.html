@@ -5,42 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>MIXXED — Регистрация</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#080808', card: '#0f0f0f', border: '#1c1c1c', accent: '#f59e0b' } } } }
+    </script>
     <link rel="stylesheet" th:href="@{/css/main.css}"/>
 </head>
-<body class="bg-bg text-white min-h-screen" style="display:flex; align-items:center; justify-content:center;">
-<div style="width:100%; max-width:420px; padding:1.5rem;">
-    <div style="text-align:center; margin-bottom:2rem;">
-        <a href="/" style="font-size:2rem; font-weight:800; color:#7c3aed; text-decoration:none;">MIXXED</a>
-        <p style="color:#888; margin-top:0.5rem;">Создайте аккаунт</p>
-    </div>
+<body class="bg-bg">
+<div class="auth-wrap">
+    <div class="w-full" style="max-width:420px;">
+        <div class="text-center mb-8">
+            <a href="/" class="auth-brand">MIXXED</a>
+            <p class="auth-subtitle">Создайте аккаунт</p>
+        </div>
 
-    <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:2rem;">
-        <div th:if="${error}" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#f87171; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1.25rem; font-size:0.875rem;"
-             th:text="${error}"></div>
+        <div class="card card-pad-lg">
+            <div th:if="${error}" class="alert-error" th:text="${error}"></div>
 
-        <form th:action="@{/register}" method="post" th:object="${form}">
-            <div style="margin-bottom:1rem;">
-                <label style="display:block; font-size:0.875rem; color:#888; margin-bottom:0.5rem;">Имя пользователя</label>
-                <input type="text" th:field="*{username}" class="form-input" placeholder="username" required autofocus/>
-            </div>
-            <div style="margin-bottom:1rem;">
-                <label style="display:block; font-size:0.875rem; color:#888; margin-bottom:0.5rem;">Email</label>
-                <input type="email" th:field="*{email}" class="form-input" placeholder="you@example.com" required/>
-            </div>
-            <div style="margin-bottom:1rem;">
-                <label style="display:block; font-size:0.875rem; color:#888; margin-bottom:0.5rem;">Пароль</label>
-                <input type="password" th:field="*{password}" class="form-input" placeholder="••••••••" required/>
-            </div>
-            <div style="margin-bottom:1.5rem;">
-                <label style="display:block; font-size:0.875rem; color:#888; margin-bottom:0.5rem;">Подтвердите пароль</label>
-                <input type="password" th:field="*{confirmPassword}" class="form-input" placeholder="••••••••" required/>
-            </div>
-            <button type="submit" class="btn-primary" style="width:100%;">Зарегистрироваться</button>
-        </form>
+            <form th:action="@{/register}" method="post" th:object="${form}">
+                <div class="form-group">
+                    <label class="form-label">Имя пользователя</label>
+                    <input type="text" th:field="*{username}" class="form-input" placeholder="username" required autofocus/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" th:field="*{email}" class="form-input" placeholder="you@example.com" required/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input type="password" th:field="*{password}" class="form-input" placeholder="••••••••" required/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Подтвердите пароль</label>
+                    <input type="password" th:field="*{confirmPassword}" class="form-input" placeholder="••••••••" required/>
+                </div>
+                <button type="submit" class="btn-primary w-full justify-center mt-2">Зарегистрироваться</button>
+            </form>
 
-        <p style="text-align:center; margin-top:1.5rem; color:#888; font-size:0.875rem;">
-            Уже есть аккаунт? <a href="/login" style="color:#7c3aed; text-decoration:none;">Войти</a>
-        </p>
+            <p class="text-center mt-6" style="color:var(--text-muted); font-size:0.875rem;">
+                Уже есть аккаунт? <a href="/login" style="color:var(--accent); text-decoration:none;">Войти</a>
+            </p>
+        </div>
     </div>
 </div>
 </body>

@@ -6,123 +6,117 @@
     <title th:text="'Статистика ' + ${profileUser.username} + ' — MIXXED'">Статистика автора — MIXXED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { bg: '#0f0f0f', card: '#1a1a1a', border: '#2a2a2a', accent: '#7c3aed' } } } }
+        tailwind.config = { theme: { extend: { colors: { bg: '#080808', card: '#0f0f0f', border: '#1c1c1c', accent: '#f59e0b' } } } }
     </script>
     <link rel="stylesheet" th:href="@{/css/main.css}"/>
 </head>
-<body class="bg-bg text-white min-h-screen">
+<body class="bg-bg min-h-screen">
 
 <div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
 
-<main style="max-width:900px; margin:0 auto; padding:2rem 1.5rem;">
+<main class="page-wrap-sm">
 
-    <div style="margin-bottom: 1.5rem;">
-        <a th:href="'/u/' + ${profileUser.username}"
-           style="color: #888; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.2s;"
-           onmouseenter="this.style.color='#7c3aed'"
-           onmouseleave="this.style.color='#888'">
-            ← Вернуться в профиль
-        </a>
+    <div class="mb-5">
+        <a th:href="'/u/' + ${profileUser.username}" class="back-link">← Вернуться в профиль</a>
     </div>
 
-    <div style="margin-bottom: 2.5rem;">
-        <h1 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.25rem;">Аналитика автора</h1>
-        <p style="color: #888; font-size: 0.9375rem;">
-            Сводные данные и показатели популярности для <span th:text="${profileUser.username}" style="color: #fff; font-weight: 600;"></span>
+    <div class="mb-10">
+        <h1 class="page-heading" style="margin-bottom:0.25rem;">Аналитика автора</h1>
+        <p style="color:var(--text-muted); font-size:0.9375rem;">
+            Сводные данные и показатели популярности для
+            <span th:text="${profileUser.username}" class="font-semibold" style="color:var(--text);"></span>
         </p>
     </div>
 
     <div th:if="${stats.totalMixes == 0}"
-         style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 4rem 2rem; text-align: center; color: #888;">
-        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📊</span>
-        <h3 style="color: #fff; font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Статистика пока недоступна</h3>
-        <p>Загрузите свой первый микс, чтобы запустить сбор аналитических данных!</p>
+         class="card text-center" style="padding:4rem 2rem;">
+        <span class="block mb-4" style="font-size:3rem;">📊</span>
+        <h3 style="color:var(--text); font-size:1.25rem; font-weight:600; margin-bottom:0.5rem;">Статистика пока недоступна</h3>
+        <p style="color:var(--text-muted);">Загрузите свой первый микс, чтобы запустить сбор аналитических данных!</p>
     </div>
 
     <div th:unless="${stats.totalMixes == 0}">
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+        <div class="grid mb-10" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1.25rem; display:grid;">
 
-            <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 14px; padding: 1.5rem; position: relative; overflow: hidden;">
-                <div style="font-size: 0.8125rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Слушают треки</div>
-                <div th:text="${#numbers.formatInteger(stats.totalPlays, 1, 'WHITESPACE')}" style="font-size: 1.75rem; font-weight: 800; color: #7c3aed;">0</div>
-                <div style="position: absolute; right: 1rem; bottom: 0.5rem; font-size: 2.5rem; opacity: 0.05; user-select: none;">▶</div>
+            <div class="stat-card">
+                <div class="stat-label">Слушают треки</div>
+                <div class="stat-value" style="color:var(--accent);"
+                     th:text="${#numbers.formatInteger(stats.totalPlays, 1, 'WHITESPACE')}">0</div>
+                <div class="stat-icon">▶</div>
             </div>
 
-            <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 14px; padding: 1.5rem; position: relative; overflow: hidden;">
-                <div style="font-size: 0.8125rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Всего релизов</div>
-                <div th:text="${stats.totalMixes}" style="font-size: 1.75rem; font-weight: 800; color: #fff;">0</div>
-                <div style="position: absolute; right: 1rem; bottom: 0.5rem; font-size: 2.5rem; opacity: 0.05; user-select: none;">💿</div>
+            <div class="stat-card">
+                <div class="stat-label">Всего релизов</div>
+                <div class="stat-value" th:text="${stats.totalMixes}">0</div>
+                <div class="stat-icon">💿</div>
             </div>
 
-            <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 14px; padding: 1.5rem; position: relative; overflow: hidden;">
-                <div style="font-size: 0.8125rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Получено лайков</div>
-                <div th:text="${stats.totalLikes}" style="font-size: 1.75rem; font-weight: 800; color: #ef4444;">0</div>
-                <div style="position: absolute; right: 1rem; bottom: 0.5rem; font-size: 2.5rem; opacity: 0.05; user-select: none;">❤️</div>
+            <div class="stat-card">
+                <div class="stat-label">Получено лайков</div>
+                <div class="stat-value" style="color:#ef4444;" th:text="${stats.totalLikes}">0</div>
+                <div class="stat-icon">❤️</div>
             </div>
 
-            <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 14px; padding: 1.5rem; position: relative; overflow: hidden;">
-                <div style="font-size: 0.8125rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Комментарии</div>
-                <div th:text="${stats.totalComments}" style="font-size: 1.75rem; font-weight: 800; color: #3b82f6;">0</div>
-                <div style="position: absolute; right: 1rem; bottom: 0.5rem; font-size: 2.5rem; opacity: 0.05; user-select: none;">💬</div>
+            <div class="stat-card">
+                <div class="stat-label">Комментарии</div>
+                <div class="stat-value" style="color:#3b82f6;" th:text="${stats.totalComments}">0</div>
+                <div class="stat-icon">💬</div>
             </div>
 
         </div>
 
-        <div th:if="${stats.mostPopularMix != null}" style="margin-top: 3rem;">
-            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                Самый популярный микс
-            </h2>
+        <div th:if="${stats.mostPopularMix != null}" class="mt-10">
+            <h2 class="section-title">Самый популярный микс</h2>
 
-            <div style="background: linear-gradient(135deg, #1a1a1a 0%, #151515 100%); border: 1px solid #2a2a2a; border-radius: 16px; padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+            <div class="card flex gap-6 items-center p-6" style="flex-wrap:wrap; background:linear-gradient(135deg,var(--surface) 0%,var(--bg) 100%);">
 
-                <div style="width: 110px; height: 110px; border-radius: 10px; overflow: hidden; background: #2a2a2a; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.4);">
+                <div class="flex-shrink-0 rounded-xl overflow-hidden flex items-center justify-center"
+                     style="width:110px; height:110px; background:var(--border-2); box-shadow:0 8px 20px rgba(0,0,0,0.4);">
                     <img th:if="${stats.mostPopularMix.coverUrl != null}"
                          th:src="'/s3/' + ${stats.mostPopularMix.coverUrl}"
                          alt="Popular mix cover"
-                         style="width: 100%; height: 100%; object-fit: cover;"/>
-                    <span th:unless="${stats.mostPopularMix.coverUrl != null}" style="font-size: 2.5rem;">🎵</span>
+                         class="w-full h-full object-cover"/>
+                    <span th:unless="${stats.mostPopularMix.coverUrl != null}" style="font-size:2.5rem;">🎵</span>
                 </div>
 
-                <div style="flex: 1; min-width: 250px;">
+                <div class="flex-1" style="min-width:200px;">
                     <span th:if="${stats.mostPopularMix.genre != null}"
-                          style="background: rgba(124, 58, 237, 0.15); color: #a78bfa; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-block; margin-bottom: 0.5rem;"
-                          th:text="${stats.mostPopularMix.genre}">Жанр</span>
-
-                    <h3 style="font-size: 1.35rem; font-weight: 700; margin: 0 0 0.25rem 0; line-height: 1.2;">
+                          class="genre-badge mb-2 inline-block"
+                          th:text="${stats.mostPopularMix.genre}"></span>
+                    <h3 style="font-family:'Unbounded',sans-serif; font-size:1.25rem; font-weight:700; margin:0 0 0.25rem; line-height:1.2;">
                         <a th:href="'/mix/' + ${stats.mostPopularMix.slug}"
                            th:text="${stats.mostPopularMix.title}"
-                           style="color: #fff; text-decoration: none; transition: color 0.15s;"
-                           onmouseenter="this.style.color='#7c3aed'"
-                           onmouseleave="this.style.color='#fff'">Название микса</a>
+                           class="no-underline hover-accent-link"
+                           style="color:var(--text); transition:color 0.15s;"
+                           onmouseenter="this.style.color='var(--accent)'"
+                           onmouseleave="this.style.color='var(--text)'">Название микса</a>
                     </h3>
-
                     <p th:if="${stats.mostPopularMix.description != null}"
                        th:text="${stats.mostPopularMix.description}"
-                       style="color: #888; font-size: 0.875rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 450px;"></p>
+                       class="truncate"
+                       style="color:var(--text-muted); font-size:0.875rem; margin:0; max-width:450px;"></p>
                 </div>
 
-                <div style="display: flex; gap: 1.5rem; background: rgba(0,0,0,0.2); border: 1px solid #222; border-radius: 12px; padding: 1rem 1.25rem; flex-shrink: 0;">
-
-                    <div style="text-align: center;">
-                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 0.25rem;">Слушали</div>
-                        <div th:text="${stats.mostPopularMix.totalPlays}" style="font-weight: 700; color: #7c3aed; font-size: 1.1rem;">0</div>
+                <div class="flex gap-6 flex-shrink-0 rounded-xl p-4"
+                     style="background:rgba(0,0,0,0.25); border:1px solid var(--border);">
+                    <div class="text-center">
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.25rem;">Слушали</div>
+                        <div th:text="${stats.mostPopularMix.totalPlays}"
+                             class="font-bold" style="color:var(--accent); font-size:1.1rem; font-family:'Unbounded',sans-serif;">0</div>
                     </div>
-
-                    <div style="border-left: 1px solid #2a2a2a;"></div>
-
-                    <div style="text-align: center;">
-                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 0.25rem;">Лайки</div>
-                        <div th:text="${stats.mostPopularMixLikes}" style="font-weight: 700; color: #ef4444; font-size: 1.1rem;">0</div>
+                    <div style="border-left:1px solid var(--border);"></div>
+                    <div class="text-center">
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.25rem;">Лайки</div>
+                        <div th:text="${stats.mostPopularMixLikes}"
+                             class="font-bold" style="color:#ef4444; font-size:1.1rem; font-family:'Unbounded',sans-serif;">0</div>
                     </div>
-
-                    <div style="border-left: 1px solid #2a2a2a;"></div>
-
-                    <div style="text-align: center;">
-                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 0.25rem;">Комменты</div>
-                        <div th:text="${stats.mostPopularMixComments}" style="font-weight: 700; color: #3b82f6; font-size: 1.1rem;">0</div>
+                    <div style="border-left:1px solid var(--border);"></div>
+                    <div class="text-center">
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.25rem;">Комменты</div>
+                        <div th:text="${stats.mostPopularMixComments}"
+                             class="font-bold" style="color:#3b82f6; font-size:1.1rem; font-family:'Unbounded',sans-serif;">0</div>
                     </div>
-
                 </div>
 
             </div>
@@ -131,6 +125,5 @@
     </div>
 
 </main>
-
 </body>
 </html>

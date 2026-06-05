@@ -20,54 +20,52 @@
 
     <div class="card card-pad-lg p-4">
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
-
-        <!-- Avatar section -->
-        <div x-data="avatarPreview()" class="mb-8">
-            <div class="flex items-center gap-5">
-                <div>
-                    <template x-if="previewUrl">
-                        <img :src="previewUrl"
-                             class="rounded-full object-cover"
-                             style="width:80px; height:80px; border:2px solid var(--accent);"
-                             alt="avatar preview">
-                    </template>
-                    <template x-if="!previewUrl">
-                        <img th:if="${currentUser.profilePictureUrl != null}"
-                             th:src="@{/s3/{key}(key=${currentUser.profilePictureUrl})}"
-                             class="rounded-full object-cover"
-                             style="width:80px; height:80px;"
-                             alt="avatar"/>
-                        <div th:unless="${currentUser.profilePictureUrl != null}"
-                             class="avatar-placeholder"
-                             style="width:80px; height:80px; font-size:1.75rem;"
-                             th:text="${currentUser.username.substring(0,1).toUpperCase()}"></div>
-                    </template>
-                </div>
-                <div>
-                    <div class="font-semibold" th:text="${currentUser.username}"></div>
-                    <div style="color:var(--text-muted); font-size:0.875rem;" th:text="${currentUser.email}"></div>
-                </div>
-            </div>
-
-            <div class="mt-5">
-                <input type="file" id="avatarFile" name="avatarFile" accept="image/*"
-                       @change="previewFile($event)" class="hidden"/>
-                <label for="avatarFile" class="btn-primary cursor-pointer">
-                    <img th:src="@{/images/icons/image.svg}" class="w-6 h-6" alt="image"/>
-                    Выбрать фото
-                </label>
-                <p class="mt-1.5" style="color:var(--text-muted); font-size:0.75rem;">JPEG, PNG. Максимум 5 МБ.</p>
-                <button type="button"
-                        x-show="previewUrl"
-                        @click="cancelPreview()"
-                        class="mt-3 bg-transparent border-none cursor-pointer p-0 underline"
-                        style="color:#f87171; font-size:0.875rem;">
-                    Отменить выбор
-                </button>
-            </div>
-        </div>
-
         <form th:action="@{/settings}" method="post" enctype="multipart/form-data" th:object="${form}">
+
+            <div x-data="avatarPreview()" class="mb-8">
+                <div class="flex items-center gap-5">
+                    <div>
+                        <template x-if="previewUrl">
+                            <img :src="previewUrl"
+                                 class="rounded-full object-cover"
+                                 style="width:80px; height:80px; border:2px solid var(--accent);"
+                                 alt="avatar preview">
+                        </template>
+                        <template x-if="!previewUrl">
+                            <img th:if="${currentUser.profilePictureUrl != null}"
+                                 th:src="@{/s3/{key}(key=${currentUser.profilePictureUrl})}"
+                                 class="rounded-full object-cover"
+                                 style="width:80px; height:80px;"
+                                 alt="avatar"/>
+                            <div th:unless="${currentUser.profilePictureUrl != null}"
+                                 class="avatar-placeholder"
+                                 style="width:80px; height:80px; font-size:1.75rem;"
+                                 th:text="${currentUser.username.substring(0,1).toUpperCase()}"></div>
+                        </template>
+                    </div>
+                    <div>
+                        <div class="font-semibold" th:text="${currentUser.username}"></div>
+                        <div style="color:var(--text-muted); font-size:0.875rem;" th:text="${currentUser.email}"></div>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <input type="file" id="avatarFile" name="avatarFile" accept="image/*"
+                           @change="previewFile($event)" class="hidden"/>
+                    <label for="avatarFile" class="btn-primary cursor-pointer">
+                        <img th:src="@{/images/icons/image.svg}" class="w-6 h-6" alt="image"/>
+                        Выбрать фото
+                    </label>
+                    <p class="mt-1.5" style="color:var(--text-muted); font-size:0.75rem;">JPEG, PNG. Максимум 5 МБ.</p>
+                    <button type="button"
+                            x-show="previewUrl"
+                            @click="cancelPreview()"
+                            class="mt-3 bg-transparent border-none cursor-pointer p-0 underline"
+                            style="color:#f87171; font-size:0.875rem;">
+                        Отменить выбор
+                    </button>
+                </div>
+            </div>
             <div class="form-group">
                 <label class="form-label">О себе</label>
                 <textarea th:field="*{bio}" class="form-input" rows="4"

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS mixes (
     id BIGSERIAL PRIMARY KEY,
-    author_id BIGINT NOT NULL REFERENCES users(id),
+    author_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     slug VARCHAR NOT NULL UNIQUE,
     title VARCHAR NOT NULL,
     description TEXT,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS mix_tracks (
 CREATE TABLE IF NOT EXISTS comments (
     id BIGSERIAL PRIMARY KEY,
     mix_id BIGINT NOT NULL REFERENCES mixes(id) ON DELETE CASCADE,
-    author_id BIGINT NOT NULL REFERENCES users(id),
+    author_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP,
     content TEXT NOT NULL,
     track_time_seconds INTEGER
@@ -43,21 +43,21 @@ CREATE TABLE IF NOT EXISTS comments (
 
 CREATE TABLE IF NOT EXISTS likes (
     id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id),
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     mix_id BIGINT NOT NULL REFERENCES mixes(id) ON DELETE CASCADE,
     UNIQUE(user_id, mix_id)
 );
 
 CREATE TABLE IF NOT EXISTS follows (
     id BIGSERIAL PRIMARY KEY,
-    follower_id BIGINT NOT NULL REFERENCES users(id),
-    followed_id BIGINT NOT NULL REFERENCES users(id),
+    follower_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    followed_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(follower_id, followed_id)
 );
 
 CREATE TABLE IF NOT EXISTS playlists (
     id BIGSERIAL PRIMARY KEY,
-    author_id BIGINT NOT NULL REFERENCES users(id),
+    author_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     slug VARCHAR(32) NOT NULL UNIQUE,
     title VARCHAR(100) NOT NULL,
     description TEXT

@@ -50,9 +50,18 @@
                             th:class="${isFollowing} ? 'btn-secondary' : 'btn-primary'"
                             th:text="${isFollowing ? 'Отписаться' : 'Подписаться'}"></button>
                 </form>
-                <a th:if="${isOwn}" href="/settings" class="btn-secondary">Редактировать профиль</a>
+                <a th:if="${isOwn}" href="/settings" class="btn-secondary">Редактировать</a>
                 <a th:if="${!isOwn and currentUser == null}" href="/login" class="btn-primary">Подписаться</a>
                 <a th:href="'/u/' + ${profileUser.username} + '/statistics'" class="btn-secondary">Статистика</a>
+                <form th:if="${!isOwn and currentUser?.isAdmin()}"
+                      th:action="'/u/' + ${profileUser.username} + '/delete'" method="post"
+                      x-data
+                      @submit.prevent="showConfirm('Вы действительно хотите удалить этот аккаунт? Это действие нельзя отменить.', 'Удалить аккаунт')
+                          .then(ok => ok && $el.submit())">
+                    <button type="submit" class="btn-danger">
+                        <span>Удалить</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -117,5 +126,6 @@
         </div>
     </div>
 </main>
+<script th:src="@{/js/modal.js}" defer></script>
 </body>
 </html>

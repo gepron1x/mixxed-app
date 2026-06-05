@@ -77,4 +77,12 @@ public class UserService {
             return true;
         }
     }
+
+    @Transactional
+    public void deleteUser(User user) {
+        if(user.getProfilePictureUrl() != null) {
+            storageService.deleteObject(user.getProfilePictureUrl());
+        }
+        userRepository.delete(user);
+    }
 }

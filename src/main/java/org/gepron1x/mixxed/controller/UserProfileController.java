@@ -8,13 +8,17 @@ import org.gepron1x.mixxed.repository.*;
 import org.gepron1x.mixxed.service.StatisticsService;
 import org.gepron1x.mixxed.service.UserService;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.stream.Collectors;
 
@@ -29,6 +33,8 @@ public class UserProfileController {
     private final FollowRepository followRepository;
     private final UserService userService;
     private final StatisticsService statisticsService;
+
+    private final RememberMeServices rememberMeServices;
 
     @GetMapping("/u/{username}")
     public String profile(@PathVariable String username, Authentication auth, Model model) {
@@ -79,5 +85,21 @@ public class UserProfileController {
         if (target == null) return "redirect:/";
         userService.toggleFollow(currentUser, target);
         return "redirect:/u/" + username;
+    }
+
+    @PostMapping("/u/{username}/delete")
+    public String delete(@PathVariable String username, Authentication auth) {
+        User currentUser = userService.getCurrentUser(auth);
+        if(currentUser == null || !currentUser.isAdmin()) {
+            throw new AccessDeniedException("Forbidden");
+        }
+        User profileUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (profileUser.getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't delete your own profile.");
+        }
+        userService.deleteUser(profileUser);
+        return "redirect:/";
     }
 }

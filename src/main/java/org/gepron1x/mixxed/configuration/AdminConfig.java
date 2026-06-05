@@ -23,9 +23,11 @@ public class AdminConfig {
 
     @PostConstruct
     public void init() {
+        System.out.println(usernames);
         for(String username : usernames.split(",")) {
             User user = userRepository.findByUsername(username).orElse(null);
             if(user == null) continue;
+            System.out.println("ADMIN: " + username);
             if(user.isAdmin()) continue;
             user.setAdmin(true);
             userRepository.save(user);

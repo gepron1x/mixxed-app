@@ -150,7 +150,7 @@ main {
     color: #fff;
     border: none;
     border-radius: 8px;
-    padding: 0.4rem 0.85rem;
+    padding: 0.625rem 1.5rem;
     cursor: pointer;
     font-family: 'Onest', sans-serif;
     font-size: 0.875rem;
@@ -167,7 +167,7 @@ main {
     color: #0a0a0a;
     border: none;
     border-radius: 8px;
-    padding: 0.4rem 0.85rem;
+    padding: 0.625rem 1.5rem;
     cursor: pointer;
     font-family: 'Onest', sans-serif;
     font-size: 0.875rem;

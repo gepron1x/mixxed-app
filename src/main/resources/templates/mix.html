@@ -6,120 +6,122 @@
     <title th:text="${mix.title} + ' — MIXXED'">Mix — MIXXED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { bg: '#0f0f0f', card: '#1a1a1a', border: '#2a2a2a', accent: '#7c3aed' } } } }
+        tailwind.config = { theme: { extend: { colors: { bg: '#080808', card: '#0f0f0f', border: '#1c1c1c', accent: '#f59e0b' } } } }
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/main.css}"/>
 </head>
-<body class="bg-bg text-white min-h-screen">
+<body class="bg-bg min-h-screen">
 
 <div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
 
-<main style="max-width:1100px; margin:0 auto; padding:2rem 1.5rem;">
-    <div style="display:grid; grid-template-columns:1fr 340px; gap:2rem;" x-data="audioPlayer(window.mixPlayerInit)">
+<main class="page-wrap-md">
+    <div class="flex gap-8" x-data="audioPlayer(window.mixPlayerInit)" style="flex-wrap:wrap;">
 
         <!-- Left column -->
-        <div>
+        <div style="flex:1; min-width:300px;">
+
             <!-- Mix header -->
-            <div style="display:flex; gap:1.5rem; margin-bottom:2rem;">
-                <div style="width:180px; height:180px; flex-shrink:0; border-radius:12px; overflow:hidden; background:#2a2a2a;">
+            <div class="flex gap-6 mb-8">
+                <div class="flex-shrink-0 rounded-xl overflow-hidden" style="width:180px; height:180px; background:var(--border-2);">
                     <img th:if="${mix.coverUrl != null}" th:src="@{/s3/{key}(key=${mix.coverUrl})}"
-                         alt="cover" style="width:100%; height:100%; object-fit:cover;"/>
+                         alt="cover" class="w-full h-full object-cover"/>
                     <div th:unless="${mix.coverUrl != null}"
-                         style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:4rem;">🎵</div>
+                         class="w-full h-full flex items-center justify-center text-6xl">🎵</div>
                 </div>
-                <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                    <div th:if="${mix.genre != null}" class="genre-badge" style="width:fit-content; margin-bottom:0.75rem;" th:text="${mix.genre}"></div>
-                    <h1 style="font-size:1.75rem; font-weight:800; margin-bottom:0.5rem;" th:text="${mix.title}"></h1>
+                <div class="flex-1 flex flex-col justify-center">
+                    <div th:if="${mix.genre != null}" class="genre-badge mb-3" style="width:fit-content;" th:text="${mix.genre}"></div>
+                    <h1 style="font-family:'Unbounded',sans-serif; font-size:1.5rem; font-weight:800; margin-bottom:0.4rem; letter-spacing:-0.02em;"
+                        th:text="${mix.title}"></h1>
                     <a th:href="'/u/' + ${mix.author.username}"
-                       style="color:#888; text-decoration:none; font-size:0.9375rem; margin-bottom:0.75rem;"
-                       th:text="${mix.author.username}"></a>
-                    <p th:if="${mix.description != null}" th:text="${mix.description}" style="color:#888; font-size:0.875rem; line-height:1.5;"></p>
-                    <div style="display:flex; align-items:center; gap:1rem; margin-top:1rem;">
-                        <span style="color:#888; font-size:0.875rem;" th:text="${mix.totalPlays} + ' прослушиваний'"></span>
-                        <!-- Like button -->
+                       th:text="${mix.author.username}"
+                       class="no-underline mb-2"
+                       style="color:var(--text-muted); font-size:0.9375rem;"></a>
+                    <p th:if="${mix.description != null}" th:text="${mix.description}"
+                       style="color:var(--text-muted); font-size:0.875rem; line-height:1.6; margin-bottom:0.75rem;"></p>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span style="color:var(--text-muted); font-size:0.875rem;"
+                              th:text="${mix.totalPlays} + ' прослушиваний'"></span>
                         <button sec:authorize="isAuthenticated()"
                                 @click="toggleLike()"
-                                :style="liked ? 'color:#7c3aed;' : 'color:#888;'"
-                                style="background:none; border:1px solid #2a2a2a; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; font-size:0.875rem; transition:all 0.2s;"
-                                :class="liked ? 'border-accent' : ''">
+                                class="like-btn"
+                                :class="liked ? 'liked' : ''">
                             <span x-text="liked ? '♥' : '♡'"></span>
                             <span x-text="likeCount"></span>
                         </button>
-                        <span sec:authorize="!isAuthenticated()" style="color:#888; font-size:0.875rem;">
+                        <span sec:authorize="!isAuthenticated()" style="color:var(--text-muted); font-size:0.875rem;">
                             <span th:text="${likeCount}"></span> ♥
                         </span>
                     </div>
                 </div>
             </div>
+
             <!-- Audio player -->
-            <div class="audio-player" style="margin-bottom:2rem;">
+            <div class="audio-player mb-8">
                 <audio x-ref="audio"
                        th:attr="data-slug=${mix.slug}"
                        preload="none"
                        @timeupdate="onTimeUpdate()"
                        @loadedmetadata="onLoaded()"
                        @ended="playing = false"
-                       style="display:none;"></audio>
+                       class="hidden"></audio>
 
-                <!-- Play/Pause + time -->
-                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
-                    <button @click="togglePlay()"
-                            style="width:48px; height:48px; border-radius:50%; background:#7c3aed; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.25rem; flex-shrink:0;">
+                <div class="flex items-center gap-4 mb-4">
+                    <button @click="togglePlay()" class="play-btn">
                         <span x-text="playing ? '⏸' : '▶'"></span>
                     </button>
-                    <div style="flex:1;">
+                    <div class="flex-1">
                         <div class="progress-bar" @click="seek($event)">
                             <div class="progress-fill" :style="'width:' + progress + '%'"></div>
                         </div>
                     </div>
-                    <span style="color:#888; font-size:0.8125rem; white-space:nowrap; min-width:80px; text-align:right;"
+                    <span style="color:var(--text-muted); font-size:0.8125rem; white-space:nowrap; min-width:80px; text-align:right; font-variant-numeric:tabular-nums;"
                           x-text="formatTime(currentTime) + ' / ' + formatTime(duration)">0:00 / 0:00</span>
                 </div>
 
-                <!-- Volume -->
-                <div style="display:flex; align-items:center; gap:0.75rem;">
-                    <span style="color:#888; font-size:0.875rem;">🔊</span>
+                <div class="flex items-center gap-3">
+                    <span style="color:var(--text-muted); font-size:0.875rem;">🔊</span>
                     <input type="range" min="0" max="1" step="0.05" x-model="volume" @input="setVolume()"
-                           style="flex:1; max-width:120px; accent-color:#7c3aed;"/>
+                           class="flex-1" style="max-width:120px; accent-color:var(--accent);"/>
                 </div>
             </div>
 
             <!-- Tracklist -->
-            <div th:if="${mix.tracks != null and !mix.tracks.isEmpty()}" style="margin-bottom:2rem;">
-                <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:1rem;">Треклист</h3>
-                <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden;">
+            <div th:if="${mix.tracks != null and !mix.tracks.isEmpty()}" class="mb-8">
+                <h3 class="section-title">Треклист</h3>
+                <div class="card overflow-hidden">
                     <div th:each="track, stat : ${mix.tracks}"
                          class="tracklist-item"
                          th:x-bind:class="|activeTrack === ${track.position} ? 'active' : ''|"
-                         th:x-on:click="|seekToTime(${track.startTimeSeconds}, ${track.position})|"
-                         style="border-bottom:1px solid #2a2a2a;">
-
-                        <span style="color:#888; font-size:0.8125rem; min-width:36px;" th:text="${track.position}"></span>
-                        <span style="color:#888; font-size:0.8125rem; min-width:50px;"
+                         th:x-on:click="|seekToTime(${track.startTimeSeconds}, ${track.position})|">
+                        <span style="color:var(--text-muted); font-size:0.8125rem; min-width:36px;"
+                              th:text="${track.position}"></span>
+                        <span style="color:var(--text-muted); font-size:0.8125rem; min-width:50px; font-variant-numeric:tabular-nums;"
                               th:text="${track.startTimeSeconds / 60} + ':' + ${#strings.toString(track.startTimeSeconds % 60).length() == 1 ? '0' + track.startTimeSeconds % 60 : track.startTimeSeconds % 60}"></span>
-                        <span style="flex:1; font-size:0.875rem;">
-                <span th:text="${track.artist}" style="font-weight:500;"></span>
-                <span th:if="${track.title != null and !track.title.isEmpty()}" style="color:#888;"> — <span th:text="${track.title}"></span></span>
-            </span>
+                        <span class="flex-1" style="font-size:0.875rem;">
+                            <span th:text="${track.artist}" class="font-medium"></span>
+                            <span th:if="${track.title != null and !track.title.isEmpty()}"
+                                  style="color:var(--text-muted);"> — <span th:text="${track.title}"></span></span>
+                        </span>
                     </div>
                 </div>
             </div>
 
             <!-- Add to playlist -->
             <div sec:authorize="isAuthenticated()" th:if="${userPlaylists != null and !userPlaylists.isEmpty()}"
-                 style="margin-bottom:2rem;" x-data="{open: false}">
+                 class="mb-8" x-data="{open: false}">
                 <button @click="open = !open" class="btn-secondary" style="font-size:0.875rem;">
                     + В плейлист
                 </button>
-                <div x-show="open" style="margin-top:0.75rem; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px; overflow:hidden; max-width:300px;">
+                <div x-show="open" class="card mt-3 overflow-hidden" style="max-width:300px;">
                     <div th:each="pl : ${userPlaylists}">
-                        <form th:action="'/playlist/' + ${pl.slug} + '/add'" method="post" style="margin:0;">
+                        <form th:action="'/playlist/' + ${pl.slug} + '/add'" method="post" class="m-0">
                             <input type="hidden" name="mixId" th:value="${mix.id}"/>
                             <button type="submit"
-                                    style="width:100%; text-align:left; padding:0.75rem 1rem; background:none; border:none; border-bottom:1px solid #2a2a2a; color:#fff; cursor:pointer; font-size:0.875rem;"
-                                    onmouseover="this.style.background='rgba(124,58,237,0.1)'"
-                                    onmouseout="this.style.background='none'"
+                                    class="w-full text-left px-4 py-3 bg-transparent border-none border-b cursor-pointer text-sm transition-colors"
+                                    style="color:var(--text); border-bottom:1px solid var(--border); font-family:'Onest',sans-serif;"
+                                    onmouseover="this.style.background='var(--accent-dim)'"
+                                    onmouseout="this.style.background='transparent'"
                                     th:text="${pl.title}"></button>
                         </form>
                     </div>
@@ -128,59 +130,56 @@
 
             <!-- Comments -->
             <div x-data="commentsManager(window.comments)" class="mt-8">
-                <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:1rem;">
-                    Комментарии <span style="color:#888; font-weight:400;" x-text="'(' + comments.length + ')'"></span>
+                <h3 class="section-title">
+                    Комментарии <span style="color:var(--text-muted); font-weight:400; font-family:'Onest',sans-serif; font-size:0.875rem;"
+                                      x-text="'(' + comments.length + ')'"></span>
                 </h3>
 
                 <form sec:authorize="isAuthenticated()"
                       th:action="'/mix/' + ${mix.slug} + '/comment'"
                       method="post"
-                      style="display:flex; gap:0.75rem; margin-bottom:1.5rem;"
+                      class="flex gap-3 mb-6"
                       @submit.prevent="addComment($event)">
-
                     <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                     <input type="text" name="content"
                            x-model="newComment"
                            class="form-input flex-1"
                            placeholder="Написать комментарий..."
                            required/>
-                    <button type="submit" class="btn-primary" style="white-space:nowrap;">Отправить</button>
+                    <button type="submit" class="btn-primary">Отправить</button>
                 </form>
 
-                <div x-show="comments.length === 0" style="color:#888; font-size:0.875rem; text-align:center; padding:2rem 0;">
+                <div x-show="comments.length === 0" class="empty-state">
                     Комментариев пока нет. Будьте первым!
                 </div>
 
-                <!-- Динамический список комментариев -->
                 <template x-for="comment in comments" :key="comment.id">
-                    <div class="comment-item"
-                         style="display:flex; gap:0.75rem; margin-bottom:1.25rem; position:relative;"
-                         :id="'comment-' + comment.id">
-
-                        <!-- Avatar -->
+                    <div class="comment-item" :id="'comment-' + comment.id">
                         <img :src="comment.profilePictureUrl ? '/s3/' + comment.profilePictureUrl : null"
-                             style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="avatar"
+                             class="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                             alt="avatar"
                              x-show="comment.profilePictureUrl"/>
                         <div x-show="!comment.profilePictureUrl"
-                             style="width:36px; height:36px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.875rem;">
+                             class="avatar-placeholder flex-shrink-0"
+                             style="width:36px; height:36px; font-size:0.875rem;">
                             <span x-text="comment.authorName.substring(0,1).toUpperCase()"></span>
                         </div>
-
-                        <div style="flex:1;">
-                            <div style="display:flex; align-items:baseline; gap:0.5rem; margin-bottom:0.25rem;">
+                        <div class="flex-1">
+                            <div class="flex items-baseline gap-2 mb-1">
                                 <a :href="'/u/' + comment.authorName"
-                                   style="font-weight:600; color:#fff; text-decoration:none; font-size:0.875rem;"
+                                   class="font-semibold no-underline"
+                                   style="color:var(--text); font-size:0.875rem;"
                                    x-text="comment.authorName"></a>
-                                <span style="color:#888; font-size:0.75rem;"
+                                <span style="color:var(--text-muted); font-size:0.75rem;"
                                       x-text="formatDate(comment.createdAt)"></span>
                             </div>
-                            <p x-text="comment.content" style="color:#ccc; font-size:0.875rem; margin:0;"></p>
+                            <p x-text="comment.content"
+                               style="color:var(--text-dim); font-size:0.875rem; margin:0;"></p>
                         </div>
-
-                        <!-- Delete button -->
                         <button @click="deleteComment(comment.id)"
                                 x-show="comment.canDelete"
-                                style="background:none; border:none; color:#888; cursor:pointer; font-size:1.25rem; padding:0.25rem; line-height:1;"
+                                class="bg-transparent border-none cursor-pointer p-1 leading-none"
+                                style="color:var(--text-muted); font-size:1.125rem;"
                                 title="Удалить комментарий">🗑</button>
                     </div>
                 </template>
@@ -188,49 +187,55 @@
 
         </div>
 
-        <!-- Right column: Up Next placeholder -->
-        <div>
-            <div style="margin-bottom:1rem;">
-                <div th:if="(${mix.author.id} == ${currentUser?.id})" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-                    <a th:href="'/mix/edit/' + ${mix.slug}"
-                       style="background: #7c3aed; color: white; border: none; border-radius: 8px; padding: 0.4rem 0.85rem; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+        <!-- Right column -->
+        <div style="width:320px; flex-shrink:0;">
+            <div class="flex gap-2 mb-4">
+                <div th:if="(${mix.author.id} == ${currentUser?.id})" class="flex gap-2 items-center">
+                    <a th:href="'/mix/edit/' + ${mix.slug}" class="btn-edit">
                         <span>✏️</span>
                         <span>Редактировать</span>
                     </a>
-
-                    <form th:if="(${currentUser?.isAdmin() == true}) or (${mix.author.id} == ${currentUser?.id})" th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
-                          style="display:inline;"
+                    <form th:if="(${currentUser?.isAdmin() == true}) or (${mix.author.id} == ${currentUser?.id})"
+                          th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
+                          class="inline"
                           onsubmit="return confirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.')">
-                        <button type="submit"
-                                style="background:#ef4444; color:white; border:none; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; gap:0.4rem;">
+                        <button type="submit" class="btn-danger">
                             <span>🗑</span>
-                            <span>Удалить микс</span>
+                            <span>Удалить</span>
                         </button>
                     </form>
                 </div>
             </div>
-            <h3 style="font-size:1rem; font-weight:600; color:#888; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.05em;">О миксе</h3>
-            <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:1.25rem;">
-                <div style="margin-bottom:0.75rem;">
-                    <span style="color:#888; font-size:0.8125rem;">Автор</span>
-                    <div><a th:href="'/u/' + ${mix.author.username}" style="color:#fff; text-decoration:none; font-size:0.9375rem;" th:text="${mix.author.username}"></a></div>
+
+            <p class="mb-3" style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">О миксе</p>
+            <div class="info-card">
+                <div class="info-field">
+                    <div class="info-label">Автор</div>
+                    <div class="info-value">
+                        <a th:href="'/u/' + ${mix.author.username}"
+                           th:text="${mix.author.username}"
+                           class="no-underline"
+                           style="color:var(--text);"></a>
+                    </div>
                 </div>
-                <div th:if="${mix.genre != null}" style="margin-bottom:0.75rem;">
-                    <span style="color:#888; font-size:0.8125rem;">Жанр</span>
-                    <div th:text="${mix.genre}" style="font-size:0.9375rem;"></div>
+                <div th:if="${mix.genre != null}" class="info-field">
+                    <div class="info-label">Жанр</div>
+                    <div class="info-value" th:text="${mix.genre}"></div>
                 </div>
-                <div style="margin-bottom:0.75rem;">
-                    <span style="color:#888; font-size:0.8125rem;">Прослушиваний</span>
-                    <div th:text="${mix.totalPlays}" style="font-size:0.9375rem;"></div>
+                <div class="info-field">
+                    <div class="info-label">Прослушиваний</div>
+                    <div class="info-value" th:text="${mix.totalPlays}"></div>
                 </div>
-                <div th:if="${mix.uploadedAt != null}">
-                    <span style="color:#888; font-size:0.8125rem;">Загружен</span>
-                    <div th:text="${#temporals.format(mix.uploadedAt, 'dd.MM.yyyy')}" style="font-size:0.9375rem;"></div>
+                <div th:if="${mix.uploadedAt != null}" class="info-field">
+                    <div class="info-label">Загружен</div>
+                    <div class="info-value" th:text="${#temporals.format(mix.uploadedAt, 'dd.MM.yyyy')}"></div>
                 </div>
             </div>
         </div>
+
     </div>
 </main>
+
 <script th:src="@{/js/mix/player.js}"></script>
 <script th:src="@{/js/mix/comments.js}"></script>
 <script th:inline="javascript">

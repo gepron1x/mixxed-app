@@ -1,32 +1,21 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec=\"http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title th:text="${playlist.title} + ' — MIXXED'">Плейлист — MIXXED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { bg: '#0f0f0f', card: '#1a1a1a', border: '#2a2a2a', accent: '#7c3aed' } } } }
+        tailwind.config = { theme: { extend: { colors: { bg: '#080808', card: '#0f0f0f', border: '#1c1c1c', accent: '#f59e0b' } } } }
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/main.css}"/>
-    <style>
-        [x-cloak] { display: none !important; }
-        .genre-badge {
-            background: rgba(124, 58, 237, 0.15);
-            color: #a78bfa;
-            padding: 0.2rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-    </style>
 </head>
-<body class="bg-bg text-white min-h-screen">
+<body class="bg-bg min-h-screen">
 
 <div th:replace="~{fragments/navbar :: navbar(${currentUser})}"></div>
 
-<main style="max-width:900px; margin:0 auto; padding:2rem 1.5rem;"
+<main class="page-wrap-sm"
       x-data="playlistPlayer(window.playlistMixes)"
       x-init="initAudio()">
 
@@ -35,115 +24,135 @@
            @loadedmetadata="duration = $el.duration"
            @ended="nextTrack()"></audio>
 
-    <div style="display:flex; gap:2rem; align-items:flex-start; margin-bottom:2.5rem;">
-        <div style="width:180px; height:180px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 25px rgba(0,0,0,0.3);">
+    <!-- Playlist header -->
+    <div class="flex gap-8 items-start mb-10" style="flex-wrap:wrap;">
+        <div class="flex-shrink-0 rounded-xl overflow-hidden flex items-center justify-center"
+             style="width:180px; height:180px; background:var(--surface); border:1px solid var(--border); box-shadow:0 10px 30px rgba(0,0,0,0.4);">
             <template x-if="mixes.length > 0 && mixes[0].coverUrl">
-                <img :src="'/s3/' + mixes[0].coverUrl" alt="playlist cover" style="width:100%; height:100%; object-fit:cover;"/>
+                <img :src="'/s3/' + mixes[0].coverUrl" alt="playlist cover" class="w-full h-full object-cover"/>
             </template>
             <template x-if="mixes.length === 0 || !mixes[0].coverUrl">
                 <span style="font-size:4rem;">💿</span>
             </template>
         </div>
 
-        <div style="flex:1; padding-top:0.5rem;">
-            <span style="color:#7c3aed; font-size:0.75rem; font-weight:700; uppercase; letter-spacing:0.1em;">ПЛЕЙЛИСТ</span>
-            <h1 th:text="${playlist.title}" style="font-size:2.5rem; font-weight:900; margin:0.25rem 0 0.75rem 0; line-height:1.1;"></h1>
-            <p th:text="${playlist.description}" style="color:#888; font-size:1rem; margin-bottom:1.5rem; max-width:600px;"></p>
+        <div class="flex-1" style="padding-top:0.5rem;">
+            <span class="genre-badge mb-3 inline-block">ПЛЕЙЛИСТ</span>
+            <h1 th:text="${playlist.title}"
+                class="page-heading" style="margin-bottom:0.75rem;"></h1>
+            <p th:text="${playlist.description}"
+               class="mb-6" style="color:var(--text-muted); font-size:1rem; max-width:600px;"></p>
+
             <form th:if="(${currentUser?.isAdmin() == true}) or (${playlist.authorUsername} == ${currentUser?.username})"
                   th:action="'/playlist/' + ${playlist.slug} + '/delete'" method="post"
-                  style="display:inline;"
+                  class="inline mb-4 block"
                   onsubmit="return confirm('Вы действительно хотите удалить этот плейлист? Это действие нельзя отменить.')">
-                <button type="submit"
-                        style="background:#ef4444; color:white; border:none; border-radius:8px; padding:0.4rem 0.85rem; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; gap:0.4rem;">
+                <button type="submit" class="btn-danger mb-4">
                     <span>🗑</span>
                     <span>Удалить плейлист</span>
                 </button>
             </form>
 
-        </div>
-            <div style="display:flex; align-items:center; gap:1rem;">
+            <div class="flex items-center gap-4">
                 <button @click="playAll()"
                         :disabled="mixes.length === 0"
-                        style="background:#7c3aed; color:white; border:none; border-radius:30px; padding:0.75rem 2rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:transform 0.2s, background 0.2s;"
-                        :style="mixes.length === 0 ? 'opacity:0.5; cursor:not-allowed;' : ''"
-                        @mouseenter="if(mixes.length > 0) $el.style.transform='scale(1.03)'"
-                        @mouseleave="$el.style.transform=''">
+                        class="btn-play-all">
                     <span>▶</span> Слушать все
                 </button>
-                <span style="color:#666;" x-text="mixes.length + ' треков'"></span>
+                <span style="color:var(--text-muted); font-size:0.875rem;"
+                      x-text="mixes.length + ' треков'"></span>
             </div>
+        </div>
     </div>
 
-    <div x-show="currentIndex !== null"
-         x-cloak
-         style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:1.25rem; margin-bottom:2rem; display:flex; flex-direction:column; gap:0.75rem; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
-
-        <div style="display:flex; align-items:center; gap:1rem;">
-            <div style="width:50px; height:50px; border-radius:6px; overflow:hidden; background:#2a2a2a; flex-shrink:0;">
+    <!-- Now playing bar -->
+    <div x-show="currentIndex !== null" x-cloak class="now-playing-bar">
+        <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center"
+                 style="width:50px; height:50px; background:var(--border-2);">
                 <template x-if="currentMix && currentMix.coverUrl">
-                    <img :src="'/s3/' + currentMix.coverUrl" alt="now playing" style="width:100%; height:100%; object-fit:cover;"/>
+                    <img :src="'/s3/' + currentMix.coverUrl" alt="now playing" class="w-full h-full object-cover"/>
                 </template>
                 <template x-if="!currentMix || !currentMix.coverUrl">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">🎵</div>
+                    <span class="text-xl">🎵</span>
                 </template>
             </div>
 
-            <div style="flex:1; min-width:0;">
-                <div style="font-size:0.8125rem; color:#7c3aed; font-weight:600;">СЕЙЧАС ИГРАЕТ</div>
-                <div x-text="currentMix ? currentMix.title : ''" style="font-weight:700; font-size:1.05rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff;"></div>
-                <div x-text="currentMix ? currentMix.authorUsername : 'Неизвестно'" style="color:#888; font-size:0.875rem;"></div>
+            <div class="flex-1 min-w-0">
+                <div style="font-size:0.75rem; color:var(--accent); font-weight:700; letter-spacing:0.08em;">СЕЙЧАС ИГРАЕТ</div>
+                <div x-text="currentMix ? currentMix.title : ''"
+                     class="font-bold truncate" style="color:var(--text); font-size:1rem;"></div>
+                <div x-text="currentMix ? currentMix.authorUsername : ''"
+                     style="color:var(--text-muted); font-size:0.875rem;"></div>
             </div>
 
-            <div style="display:flex; align-items:center; gap:0.75rem;">
-                <button @click="prevTrack()" style="background:none; border:none; color:#fff; font-size:1.25rem; cursor:pointer; padding:0 0.5rem;">⏮</button>
-                <button @click="togglePlay()" style="background:#fff; color:#000; border:none; width:40px; height:40px; border-radius:50%; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+            <div class="flex items-center gap-3">
+                <button @click="prevTrack()"
+                        class="bg-transparent border-none cursor-pointer text-xl p-1"
+                        style="color:var(--text);">⏮</button>
+                <button @click="togglePlay()"
+                        class="flex items-center justify-center rounded-full border-none cursor-pointer font-bold"
+                        style="width:40px; height:40px; background:var(--text); color:var(--bg); font-size:1rem;">
                     <span x-show="!playing">▶</span>
                     <span x-show="playing">⏸</span>
                 </button>
-                <button @click="nextTrack()" style="background:none; border:none; color:#fff; font-size:1.25rem; cursor:pointer; padding:0 0.5rem;">⏭</button>
+                <button @click="nextTrack()"
+                        class="bg-transparent border-none cursor-pointer text-xl p-1"
+                        style="color:var(--text);">⏭</button>
             </div>
         </div>
 
-        <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.75rem; color:#888; font-family:monospace;">
+        <div class="flex items-center gap-3" style="font-size:0.75rem; color:var(--text-muted); font-variant-numeric:tabular-nums;">
             <span x-text="formatTime(currentTime)">0:00</span>
-            <div @click="seek($event)" style="flex:1; height:6px; background:#2a2a2a; border-radius:3px; position:relative; cursor:pointer;">
-                <div :style="'width: ' + progress + '%'" style="height:100%; background:#7c3aed; border-radius:3px; transition:width 0.1s linear;"></div>
+            <div @click="seek($event)"
+                 class="flex-1 rounded cursor-pointer relative"
+                 style="height:4px; background:var(--border-2);">
+                <div :style="'width: ' + progress + '%'"
+                     class="rounded"
+                     style="height:100%; background:var(--accent); transition:width 0.1s linear;"></div>
             </div>
             <span x-text="formatTime(duration)">0:00</span>
         </div>
     </div>
 
-    <div style="background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden;">
-        <div x-show="mixes.length === 0" style="padding:3rem; text-align:center; color:#888;" x-cloak>
-            Плейлист пуст. <a href="/" style="color:#7c3aed; text-decoration:none;">Добавьте миксы на главной!</a>
+    <!-- Track list -->
+    <div class="card overflow-hidden">
+        <div x-show="mixes.length === 0" class="empty-state" x-cloak>
+            Плейлист пуст. <a href="/" style="color:var(--accent); text-decoration:none;">Добавьте миксы на главной!</a>
         </div>
         <template x-for="(mix, index) in mixes" :key="mix.slug">
             <div @click="playAt(index)"
-                 class="flex flex-row items-center gap-4 px-5 py-3.5 border-b border-[#2a2a2a] hover:bg-white/5 transition-colors cursor-pointer"
-                 :class="{ 'bg-violet-500/10': currentIndex === index }">
+                 class="flex items-center gap-4 px-5 py-3.5 cursor-pointer transition-colors"
+                 style="border-bottom:1px solid var(--border);"
+                 :style="currentIndex === index ? 'background:var(--accent-dim);' : ''"
+                 onmouseover="if(!this.style.background.includes('accent')) this.style.background='rgba(255,255,255,0.03)'"
+                 onmouseout="if(!this.style.background.includes('accent')) this.style.background=''">
 
-                <div class="w-7 text-center flex-shrink-0 text-gray-400 text-sm font-medium">
+                <div class="w-7 text-center flex-shrink-0 text-sm font-medium"
+                     style="color:var(--text-muted);">
                     <span x-show="currentIndex !== index" x-text="index + 1"></span>
                     <span x-show="currentIndex === index"
-                          class="text-violet-500"
+                          style="color:var(--accent);"
                           x-text="playing ? '▶' : '⏸'"></span>
                 </div>
 
-                <div class="w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-zinc-800 flex items-center justify-center">
+                <div class="w-11 h-11 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center"
+                     style="background:var(--border-2);">
                     <template x-if="mix.coverUrl">
                         <img :src="'/s3/' + mix.coverUrl" alt="cover" class="w-full h-full object-cover">
                     </template>
                     <template x-if="!mix.coverUrl">
-                        <span class="text-2xl">🎵</span>
+                        <span class="text-xl">🎵</span>
                     </template>
                 </div>
 
                 <div class="flex-1 min-w-0">
                     <div x-text="mix.title"
                          class="font-medium truncate"
-                         :class="currentIndex === index ? 'text-violet-400' : 'text-white'"></div>
+                         :style="currentIndex === index ? 'color:var(--accent)' : 'color:var(--text)'"></div>
                     <div x-text="mix.authorUsername || 'Неизвестно'"
-                         class="text-gray-400 text-sm truncate mt-0.5"></div>
+                         class="text-sm truncate mt-0.5"
+                         style="color:var(--text-muted);"></div>
                 </div>
 
                 <div class="flex-shrink-0">
@@ -152,13 +161,17 @@
                     </template>
                 </div>
 
-                <div class="w-20 text-right text-gray-400 text-sm flex-shrink-0"
+                <div class="flex-shrink-0 text-right text-sm w-20"
+                     style="color:var(--text-muted);"
                      x-text="mix.totalPlays + ' ♪'"></div>
 
                 <div class="flex-shrink-0">
                     <a :href="'/mix/' + mix.slug"
                        @click.stop
-                       class="text-gray-500 hover:text-violet-400 text-xl px-2 py-1 transition-colors"
+                       class="px-2 py-1 text-xl no-underline transition-colors"
+                       style="color:var(--text-muted);"
+                       onmouseover="this.style.color='var(--accent)'"
+                       onmouseout="this.style.color='var(--text-muted)'"
                        title="Открыть страницу микса">↗</a>
                 </div>
             </div>
@@ -170,6 +183,5 @@
     window.playlistMixes = /*[[${playlist.mixes}]]*/ [];
 </script>
 <script th:src="@{/js/playlist.js}"></script>
-
 </body>
 </html>

@@ -47,7 +47,9 @@
             ((${currentUser?.isAdmin() == true}) or (${playlist.authorUsername} == ${currentUser?.username}))"
                   th:action="'/playlist/' + ${playlist.slug} + '/delete'" method="post"
                   class="inline mb-4 block"
-                  onsubmit="return confirm('Вы действительно хотите удалить этот плейлист? Это действие нельзя отменить.')">
+                  x-data
+                  @submit.prevent="showConfirm('Вы действительно хотите удалить этот плейлист? Это действие нельзя отменить.', 'Удалить плейлист')
+                  .then(ok => ok && $el.submit())">
                 <button type="submit" class="btn-danger mb-4">
                     <span>Удалить плейлист</span>
                 </button>
@@ -185,6 +187,7 @@
 <script th:inline="javascript">
     window.playlistMixes = /*[[${playlist.mixes}]]*/ [];
 </script>
+<script th:src="@{/js/modal.js}" defer></script>
 <script th:src="@{/js/playlist.js}"></script>
 </body>
 </html>

@@ -196,8 +196,9 @@
                     </a>
                     <form th:if="(${currentUser?.isAdmin() == true}) or (${mix.author.id} == ${currentUser?.id})"
                           th:action="'/mix/' + ${mix.slug} + '/delete'" method="post"
-                          class="inline"
-                          onsubmit="return confirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.')">
+                          x-data
+                          @submit.prevent="showConfirm('Вы действительно хотите удалить этот микс? Это действие нельзя отменить.', 'Удалить микс')
+                          .then(ok => ok && $el.submit())">
                         <button type="submit" class="btn-danger">
                             <span>Удалить</span>
                         </button>
@@ -236,6 +237,7 @@
 
 <script th:src="@{/js/mix/player.js}"></script>
 <script th:src="@{/js/mix/comments.js}"></script>
+<script th:src="@{/js/modal.js}" defer></script>
 <script th:inline="javascript">
     window.mixPlayerInit = {
         liked: /*[[${liked}]]*/ false,

@@ -18,7 +18,7 @@
 <main class="page-wrap-form">
     <h1 class="page-heading">Настройки профиля</h1>
 
-    <div class="card card-pad-lg">
+    <div class="card card-pad-lg p-4">
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
 
         <!-- Avatar section -->
@@ -53,9 +53,7 @@
                 <input type="file" id="avatarFile" name="avatarFile" accept="image/*"
                        @change="previewFile($event)" class="hidden"/>
                 <label for="avatarFile" class="btn-primary cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v-4m0 0l4 4m-4-4l4-4m12 4v4m0-4l-4-4m4 4l-4 4" />
-                    </svg>
+                    <img th:src="@{/images/icons/image.svg}" class="w-6 h-6" alt="image"/>
                     Выбрать фото
                 </label>
                 <p class="mt-1.5" style="color:var(--text-muted); font-size:0.75rem;">JPEG, PNG. Максимум 5 МБ.</p>

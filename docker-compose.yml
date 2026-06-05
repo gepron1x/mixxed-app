@@ -61,6 +61,7 @@ services:
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
       # Mixxed
       ADMIN_USERNAMES: ${ADMIN_USERNAMES}
+      POPULATE_WITH_DEMO_DATA: ${POPULATE_WITH_DEMO_DATA}
     ports:
       - "7080:7080"
     networks:

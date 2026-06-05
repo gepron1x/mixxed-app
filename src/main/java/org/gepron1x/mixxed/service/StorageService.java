@@ -72,23 +72,6 @@ public class StorageService {
         }
     }
 
-    public String getPresignedUrl(String key) {
-        try {
-            PresignedGetObjectRequest presigned = s3Presigner.presignGetObject(
-                    GetObjectPresignRequest.builder()
-                            .signatureDuration(Duration.ofHours(1))
-                            .getObjectRequest(GetObjectRequest.builder()
-                                    .bucket(bucket)
-                                    .key(key)
-                                    .build())
-                            .build()
-            );
-            return presigned.url().toString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public Optional<ResponseEntity<InputStreamResource>> getFile(String key) {
         GetObjectRequest getRequest = GetObjectRequest.builder()
                 .bucket(bucket)
@@ -162,7 +145,7 @@ public class StorageService {
         s3Client.deleteObject(builder -> builder.bucket(bucket).key(key));
     }
 
-    private void ensureBucket() {
+    public void ensureBucket() {
         try {
             s3Client.headBucket(b -> b.bucket(bucket));
         } catch (Exception e) {

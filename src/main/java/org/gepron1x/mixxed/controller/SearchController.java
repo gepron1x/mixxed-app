@@ -38,7 +38,7 @@ public class SearchController {
     public String search(
             @RequestParam(value = "q", defaultValue = "") String query,
             @RequestParam(defaultValue = "0")     int    page,
-            @RequestParam(defaultValue = "30")    int    size,
+            @RequestParam(defaultValue = "15")    int    size,
             @RequestParam(defaultValue = "title") String sortBy,
             @RequestParam(defaultValue = "asc")   String direction,
             Authentication auth, Model model) {

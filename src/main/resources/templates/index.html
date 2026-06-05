@@ -42,6 +42,14 @@
             <span sec:authorize="isAuthenticated()">Для вас</span>
             <span sec:authorize="!isAuthenticated()">Новые миксы</span>
         </h2>
+        <div th:if="${recommendations != null and !recommendations.isEmpty()}" class="grid-cards">
+            <th:block th:each="mix : ${recommendations}">
+                <div th:replace="~{fragments/mix-card :: mixCard(${mix}, true)}"></div>
+            </th:block>
+        </div>
+        <div th:if="${recommendations == null or recommendations.isEmpty()}" class="empty-state">
+            Пока нет миксов.
+        </div>
     </section>
 
     <section class="section">

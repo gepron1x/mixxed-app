@@ -43,7 +43,8 @@
             <p th:text="${playlist.description}"
                class="mb-6" style="color:var(--text-muted); font-size:1rem; max-width:600px;"></p>
 
-            <form th:if="(${currentUser?.isAdmin() == true}) or (${playlist.authorUsername} == ${currentUser?.username})"
+            <form th:if="(${playlist.id} >= 0) and
+            ((${currentUser?.isAdmin() == true}) or (${playlist.authorUsername} == ${currentUser?.username}))"
                   th:action="'/playlist/' + ${playlist.slug} + '/delete'" method="post"
                   class="inline mb-4 block"
                   onsubmit="return confirm('Вы действительно хотите удалить этот плейлист? Это действие нельзя отменить.')">
@@ -118,7 +119,10 @@
     <!-- Track list -->
     <div class="card overflow-hidden">
         <div x-show="mixes.length === 0" class="empty-state" x-cloak>
-            Плейлист пуст. <a href="/" style="color:var(--accent); text-decoration:none;">Добавьте миксы на главной!</a>
+            Плейлист пуст.
+            <a th:if="(${playlist.id} >= 0) and (${playlist.authorUsername} == ${currentUser?.username})"
+               href="/" style="color:var(--accent); text-decoration:none;">
+                Добавьте миксы на главной!</a>
         </div>
         <template x-for="(mix, index) in mixes" :key="mix.slug">
             <div @click="playAt(index)"

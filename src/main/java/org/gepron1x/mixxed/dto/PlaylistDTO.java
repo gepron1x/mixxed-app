@@ -1,6 +1,7 @@
 package org.gepron1x.mixxed.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.gepron1x.mixxed.entity.Mix;
 import org.gepron1x.mixxed.entity.Playlist;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class PlaylistDTO {
 
     private final Long id;

@@ -77,7 +77,7 @@ public class RecommendationService {
         UserProfile profile = buildUserProfile(user);
 
         List<Mix> filtered = candidates.stream()
-                .filter(m -> !m.getAuthor().getId().equals(user.getId()))
+        //        .filter(m -> !m.getAuthor().getId().equals(user.getId())) Disabled for now
                 .filter(m -> !profile.likedMixIds().contains(m.getId()))
                 .collect(Collectors.toList());
 

@@ -34,6 +34,7 @@
         <div class="flex-1">
             <h1 style="font-family:'Unbounded',sans-serif; font-size:1.6rem; font-weight:800; margin-bottom:0.25rem; letter-spacing:-0.02em;"
                 th:text="${profileUser.username}"></h1>
+            <span th:if="${profileUser.admin}" class="genre-badge">Админ</span>
             <p th:if="${profileUser.bio != null and !profileUser.bio.isEmpty()}"
                th:text="${profileUser.bio}"
                class="mb-3"

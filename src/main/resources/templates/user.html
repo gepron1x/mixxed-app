@@ -53,7 +53,7 @@
                 <a th:if="${isOwn}" href="/settings" class="btn-secondary">Редактировать</a>
                 <a th:if="${!isOwn and currentUser == null}" href="/login" class="btn-primary">Подписаться</a>
                 <a th:href="'/u/' + ${profileUser.username} + '/statistics'" class="btn-secondary">Статистика</a>
-                <form th:if="${!isOwn and currentUser?.isAdmin()}"
+                <form th:if="${!isOwn and currentUser?.isAdmin() == true}"
                       th:action="'/u/' + ${profileUser.username} + '/delete'" method="post"
                       x-data
                       @submit.prevent="showConfirm('Вы действительно хотите удалить этот аккаунт? Это действие нельзя отменить.', 'Удалить аккаунт')

@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Controller
 @RequiredArgsConstructor
 public class UploadController {
@@ -44,7 +47,7 @@ public class UploadController {
         if (currentUser == null) return "redirect:/login";
         try {
             Mix mix = mixService.uploadMix(currentUser, form);
-            return "redirect:/mix/" + mix.getSlug();
+            return "redirect:/mix/" + URLEncoder.encode(mix.getSlug(), StandardCharsets.UTF_8);
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("form", form);
